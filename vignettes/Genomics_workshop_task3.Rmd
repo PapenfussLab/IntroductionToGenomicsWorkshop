@@ -1,0 +1,31 @@
+---
+title: "Genomics Workshop: Task 3"
+author: 
+  Ruining Dong^[dong.rn@wehi.edu.au], 
+  James Fu, Daniel Cameron
+output: 
+  rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Genomic Workshop}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, eval = FALSE)
+```
+
+## COSMIC
+
+
+
+
+

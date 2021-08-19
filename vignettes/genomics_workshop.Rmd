@@ -1,0 +1,115 @@
+---
+title: "Genomics Workshop"
+author: 
+  Ruining Dong^[dong.rn@wehi.edu.au], 
+  James Fu, Daniel Cameron
+output: 
+  rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Genomic Workshop}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+
+## Overview
+In this 1-hour workshop, you will have hands-on experience on SNP calling and 
+analysis. You will be provided toy short-read sequencing samples, followed by 
+read alignments, variant calling and pathogenicity analysis.
+
+### Description
+
+This is a hands-on workshop, which means you will be given time to get the tools running. For each task, you will be given a brief instruction prior to getting your hands dirty. At the end of the given time, there will be a brief summary.
+
+### Pre-requisites
+
+*Basic knowledge of using command line and Rstudio is ideal. Although no prior knowledge is required for this workshop. *
+
+### Participation
+
+*Describe how students will be expected to participate in the workshop.*
+
+### Tools to be used
+**CITATIONS!!!**
+
+* [bwa](http://bio-bwa.sourceforge.net/bwa.shtml)
+* [samtools](http://www.htslib.org/doc/samtools.html)
+* [Strelka2](https://github.com/Illumina/strelka)
+* [COSMIC](https://cancer.sanger.ac.uk/cosmic)
+
+### Time outline
+
+For this 120-minute workshop:
+
+| Activity                                               | Time |
+|--------------------------------------------------------|------|
+| Introduction                                           |  5m  |
+| Working Environment: command line and Rstudio          | 15m  |
+| Read Alignment: bwa and samtools                       | 30m  |
+| SNP calling: Strelka2                                  | 40m  |
+| Pathogenicity analysis: COSMIC                         | 20m  |
+| Summary                                                | 10m  |
+
+### Workshop goals and objectives
+
+List "big picture" student-centered workshop goals and learning
+objectives. Learning goals and objectives are related, but not the
+same thing. These goals and objectives will help some people to decide
+whether to attend the conference for training purposes, so please make
+these as precise and accurate as possible.
+
+*Learning goals* are high-level descriptions of what
+participants will learn and be able to do after the workshop is
+over. *Learning objectives*, on the other hand, describe in very
+specific and measurable terms specific skills or knowledge
+attained. The [Bloom's Taxonomy](#bloom) may be a useful framework
+for defining and describing your goals and objectives, although there
+are others.
+
+### Learning goals
+
+Some examples:
+
+* describe how to...
+* identify methods for...
+* understand the difference between...
+
+### Learning objectives
+
+* analyze xyz data to produce...
+* create xyz plots
+* evaluate xyz data for artifacts
+
+## Workshop
+### Getting started:
+1. file location
+2. where to work
+3. set up working directory
+
+### Task 1: aligning reads to the reference genome
+
+Here you will need to align short-read sequencing reads to the reference genome (hg38???). There are two samples you will need the work with, the tumor sample and the matched normal sample. (*explain the usage of paired tumor/normal samples and how it helps with pathogenicity analysis*)
+
+The below code chunks should only show introduction content to the tools, instead of the actual code.
+```{bash eval=FALSE, include=TRUE}
+bwa mem
+```
+
+The answers of each task is in a separate vignette file (Genomics_workshop_task*.Rmd) -> check workshop home page link tabs!!!
+or 
+[Answer](/path/to/pdf) ???
+
+### Task 2: calling SNPs using Strelka2
+
+### Task 3: investing the driver gene
+
+
+
