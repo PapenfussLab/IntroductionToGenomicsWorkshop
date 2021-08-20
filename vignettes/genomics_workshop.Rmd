@@ -1,16 +1,13 @@
 ---
 title: "Genomics Workshop"
 author: 
-  Ruining Dong^[dong.rn@wehi.edu.au], 
-  James Fu, Daniel Cameron
-output: rmdformats::downcute
-  # rmarkdown::downcute
-    # highlight: pygments
-    # toc: true
-    # toc_float: true
-    # toc_depth: 3
-    # #fig_width: 5
-    # number_sections: false
+  - Ruining Dong^[dong.rn@wehi.edu.au]
+  - James Fu^[fu.j@wehi.edu.au]
+  - Daniel Cameron^[cameron.d@wehi.edu.au]
+output: 
+  rmdformats::downcute:
+    toc_depth: 6
+  # rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Genomic Workshop}
   %\VignetteEngine{knitr::rmarkdown}
@@ -27,29 +24,34 @@ knitr::opts_chunk$set(
 
 
 ## Overview
-In this 1-hour workshop, you will have hands-on experience on SNP calling and 
+In this 1-hour workshop, you will have hands-on experience on SNV calling and 
 analysis. You will be provided toy short-read sequencing samples, followed by 
 read alignments, variant calling and pathogenicity analysis.
 
 ### Description
+This workshop will guide you through the workflow of a simple genomic SNV analysis.
 
-This is a hands-on workshop, which means you will be given time to get the tools running. For each task, you will be given a brief instruction prior to getting your hands dirty. At the end of the given time, there will be a brief summary.
+This is a hands-on workshop, which means you will be given time to get the tools running. 
+
+For each task, you will be given a brief instruction prior to getting your hands dirty. At the end of the given time, there will be a brief summary.
 
 ### Pre-requisites
 
-*Basic knowledge of using command line and Rstudio is ideal. Although no prior knowledge is required for this workshop. *
+Basic knowledge of using command line and Rstudio is ideal. Although strictly speaking, no prior knowledge is required to attend this workshop.
 
 ### Participation
 
-*Describe how students will be expected to participate in the workshop.*
+The workshop runs for 2 hours. You will find tasks and related information in the worksheet.
+
+If you run into any problems, please describe the issue and send via zoom chat. The instructors will be monitoring the chat panel and answer any question in real time.
 
 ### Tools to be used
-**CITATIONS!!!**
 
 * [bwa](http://bio-bwa.sourceforge.net/bwa.shtml)
 * [samtools](http://www.htslib.org/doc/samtools.html)
 * [Strelka2](https://github.com/Illumina/strelka)
 * [COSMIC](https://cancer.sanger.ac.uk/cosmic)
+**To be updated**
 
 ### Time outline
 
@@ -60,79 +62,114 @@ For this 120-minute workshop:
 | Introduction                                           |  5m  |
 | Working Environment: command line and Rstudio          | 15m  |
 | Read Alignment: bwa and samtools                       | 30m  |
-| SNP calling: Strelka2                                  | 40m  |
-| Pathogenicity analysis: COSMIC                         | 20m  |
+| SNV calling: Strelka2                                  | 40m  |
+| Pathogenicity analysis                                 | 20m  |
 | Summary                                                | 10m  |
 
 ### Workshop goals and objectives
 
-List "big picture" student-centered workshop goals and learning
-objectives. Learning goals and objectives are related, but not the
-same thing. These goals and objectives will help some people to decide
-whether to attend the conference for training purposes, so please make
-these as precise and accurate as possible.
+Variant calling is a vital component of genomics studies. Genomic variants have been found in various structures and sizes, including single-nucleotide variants (SNVs), small insertion and deletions (INDELs), copy number variants (CNVs) and structural variants (SVs). Computational tools for detecting these variants are developed with different underlying approaches.
 
-*Learning goals* are high-level descriptions of what
-participants will learn and be able to do after the workshop is
-over. *Learning objectives*, on the other hand, describe in very
-specific and measurable terms specific skills or knowledge
-attained. The [Bloom's Taxonomy](#bloom) may be a useful framework
-for defining and describing your goals and objectives, although there
-are others.
+This workshop is designed to offer a hands-on experience on genomic variant calling and analysis. The tasks are designed to guide you through the key steps of SNV analysis on a tumour/normal paired sample.  
 
 ### Learning goals
 
-Some examples:
-
-* describe how to...
-* identify methods for...
-* understand the difference between...
+* To understand the general workflow of a genomic variant analysis
+* To identify methods to handle short-read sequencing data and variant calls
 
 ### Learning objectives
 
-* analyze xyz data to produce...
-* create xyz plots
-* evaluate xyz data for artifacts
+* To recall the key concepts in genomic variant analysis
+* To apply the concepts in SNV calling to germline and paired tumour/normal data
+* To perform SNV analysis using publicly available resources
 
 ## Workshop
 ### Getting started:
-1. file location
-2. where to work
-3. set up working directory
+1. Rstudio working environment (console vs. terminal)
+2. Data directory
+3. Working with UNIX commands
+4. SNV analysis workflow (**image to be updated**)
 
-### Task 1: aligning reads to the reference genome
-
-Here you will need to align short-read sequencing reads to the reference genome (hg38???). There are two samples you will need the work with, the tumor sample and the matched normal sample. (*explain the usage of paired tumor/normal samples and how it helps with pathogenicity analysis*)
-
-The below code chunks should only show introduction content to the tools, instead of the actual code.
-```{bash eval=FALSE, include=TRUE}
-bwa mem [options] <idxbase> <in1.fq> [in2.fq]
+```{r, echo=FALSE}
+knitr::include_graphics("../inst/images/Example-of-a-best-practices-SNV-calling-workflow-for-somatic-exome-and-genome-data.png")
 ```
 
-The answers of each task is in a separate vignette file (Genomics_workshop_task*.Rmd) -> check workshop home page link tabs!!!
+### Task 1: read alignments, sorting, and indexing
 
-**OR **
+Here you will need to align short-read sequencing reads to the reference genome (hg19) and get them ready for SNV calling. There are two samples you will need the work with, the tumor sample and the matched normal sample of COLO829^[Craig, D., Nasser, S., Corbett, R. et al. A somatic reference standard for cancer genome sequencing. Sci Rep 6, 24607 (2016). https://doi.org/10.1038/srep24607].
+
+
+#### *Aligning reads to the reference genome*
+
+First, we need to map the sequencing reads to the reference genome.
+The reads can be found at `/path/to/fastq`, and the reference genome is located at `/path/to/fa`.
+
+```{bash, eval=FALSE, include=TRUE}
+bwa mem [options] <idxbase> <in1.fq> [in2.fq] > colo829.sam
+```
+
+#### *Converting the output file format*
+
+To be updated
+```{bash, eval=FALSE, include=TRUE}
+#bwa mem [options] <idxbase> <in1.fq> [in2.fq] > colo829.sam
+```
+
+#### *Sorting and indexing*
+
+To be updated
+```{bash, eval=FALSE, include=TRUE}
+#bwa mem [options] <idxbase> <in1.fq> [in2.fq] > colo829.sam
+```
+
 
 <details>
 <summary>Solution (interactively)</summary>
 <ul>
 <li>First do this.</li>
 ```{bash, eval = FALSE}
-samtools sort [options] 
+bwa index ref.fa
+bwa mem ref.fa read1.fq read2.fq > output.sam
 ```
 <li>Then do that.</li>
-<li>Blah blah.</li>
 ```{bash, eval = FALSE}
-samtools index [options] 
+samtools view -S -b output.sam -o output.bam #converting SAM to BAM
+samtools sort output.bam output.sorted #sorting the BAM reads
+samtools index output.sorted.bam #indexing the sorted BAM
 ```
+
+<li>OR, pipe some of the commands in a one-liner:</li>
+
+```{bash, eval = FALSE}
+bwa mem ref.fa read1.fq read2.fq | samtools view -S -b - | samtools sort -o output.sorted.bam -
+
+samtools index output.sorted.bam
+```
+
+<li>Blah blah.</li>
 <li>You should be able to see the resultant files `file1` and `file2`.</li>
 
 </ul>
 </details>
 
-### Task 2: calling SNPs using Strelka2
+### Task 2: calling SNVs using Strelka2
+Now that we have the sequencing reads in order, we will start calling SNVs.
+Blah blah...
 
-### Task 3: investing the driver gene
+```{bash, eval = FALSE}
+#strelka example command
+```
+
+### Task 3: investigating the driver gene
+Text text
+
+```{r}
+#install.packages()
+
+```
+
+
+
 
 
 
