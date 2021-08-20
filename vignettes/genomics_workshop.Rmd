@@ -3,8 +3,14 @@ title: "Genomics Workshop"
 author: 
   Ruining Dong^[dong.rn@wehi.edu.au], 
   James Fu, Daniel Cameron
-output: 
-  rmarkdown::html_vignette
+output: rmdformats::downcute
+  # rmarkdown::downcute
+    # highlight: pygments
+    # toc: true
+    # toc_float: true
+    # toc_depth: 3
+    # #fig_width: 5
+    # number_sections: false
 vignette: >
   %\VignetteIndexEntry{Genomic Workshop}
   %\VignetteEngine{knitr::rmarkdown}
@@ -100,12 +106,29 @@ Here you will need to align short-read sequencing reads to the reference genome 
 
 The below code chunks should only show introduction content to the tools, instead of the actual code.
 ```{bash eval=FALSE, include=TRUE}
-bwa mem
+bwa mem [options] <idxbase> <in1.fq> [in2.fq]
 ```
 
 The answers of each task is in a separate vignette file (Genomics_workshop_task*.Rmd) -> check workshop home page link tabs!!!
-or 
-[Answer](/path/to/pdf) ???
+
+**OR **
+
+<details>
+<summary>Solution (interactively)</summary>
+<ul>
+<li>First do this.</li>
+```{bash, eval = FALSE}
+samtools sort [options] 
+```
+<li>Then do that.</li>
+<li>Blah blah.</li>
+```{bash, eval = FALSE}
+samtools index [options] 
+```
+<li>You should be able to see the resultant files `file1` and `file2`.</li>
+
+</ul>
+</details>
 
 ### Task 2: calling SNPs using Strelka2
 
