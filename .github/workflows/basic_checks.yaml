@@ -3,6 +3,7 @@ on: [push, pull_request]
 env:
   cache-version: v1
   repo-name: wehiworkshop/introductiontogenomicsworkshop
+  GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
   job1:
