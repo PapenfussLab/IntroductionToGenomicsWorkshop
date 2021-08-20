@@ -25,7 +25,7 @@ Suggests:
     rmarkdown,
     pkgdown,
     rmdformats
-URL: https://github.com/PapenfussLab/IntroductionToGenomicsWorkshop
+URL: https://PapenfussLab.github.io/IntroductionToGenomicsWorkshop
 BugReports: https://github.com/PapenfussLab/IntroductionToGenomicsWorkshop/issues
 VignetteBuilder: knitr
 DockerImage: wehiworkshop/introductiontogenomicsworkshop:latest
