@@ -102,7 +102,13 @@
 <div id="bwa" class="section level2">
 <h2 class="hasAnchor">
 <a href="#bwa" class="anchor"></a>BWA</h2>
-<div class="sourceCode" id="cb1"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">bwa</span> mem ...</span></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">bwa</span> mem <span class="at">-t</span> <span class="va">$(</span><span class="ex">nproc</span><span class="va">)</span> chr7.fa normal_R1.fastq.gz normal_R2.fastq.gz <span class="kw">|</span> <span class="ex">samtools</span> sort <span class="at">-@</span> <span class="va">$(</span><span class="ex">nproc</span><span class="va">)</span> <span class="at">-</span> <span class="op">&gt;</span> normal.bam</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="ex">bwa</span> mem <span class="at">-t</span> <span class="va">$(</span><span class="ex">nproc</span><span class="va">)</span> chr7.fa tumour_R1.fastq.gz tumour_R2.fastq.gz <span class="kw">|</span> <span class="ex">samtools</span> sort <span class="at">-@</span> <span class="va">$(</span><span class="ex">nproc</span><span class="va">)</span> <span class="at">-</span> <span class="op">&gt;</span> tumour.bam</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="ex">samtools</span> index normal.bam</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="ex">samtools</span> index tumour.bam</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="ex">configureStrelkaSomaticWorkflow.py</span> <span class="at">--normalBam</span> normal.bam <span class="at">--tumorBam</span> tumour.bam <span class="at">--referenceFasta</span> chr7.fa <span class="at">--runDir</span> strelka</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="ex">strelka/runWorkflow.py</span> <span class="at">-j</span> <span class="va">$(</span><span class="ex">nproc</span><span class="va">)</span> <span class="at">-m</span> local</span></code></pre></div>
+<p><a href="https://github.com/Illumina/strelka/blob/v2.9.x/docs/userGuide/quickStart.md" class="uri">https://github.com/Illumina/strelka/blob/v2.9.x/docs/userGuide/quickStart.md</a></p>
 </div>
 <div id="samtools" class="section level2">
 <h2 class="hasAnchor">
