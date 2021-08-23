@@ -31,8 +31,7 @@ library(BSgenome.Hsapiens.UCSC.hg19)
 We use the `VariantAnnotation` package to read and annotate the SNVs we just found.
 
 ```{r, eval = TRUE}
-setwd('~/Documents/Codes_Data/2021_wehi_summer_school/IntroductionToGenomicsWorkshop/')
-file_dir <- "./data/full/strelka/COLO829R_COLO829T_strelka_passed.somatic.merged.vcf"
+file_dir <- "./colo829/full/strelka/COLO829R_COLO829T_strelka_passed.somatic.merged.vcf"
 vcf <- readVcf(file_dir)
 ```
 
@@ -152,12 +151,12 @@ Here shows all consequences of coding variants.
 unique(coding$CONSEQUENCE)
 ```
 
-The coding result can be filtered by different syntaxes and functions.
-**Why are there variants without genes?**
+The coding result can be filtered by different syntaxes and functions. 
+**Why are there variants without genes? And duplicates?**
 
 ```{r, eval = TRUE}
-head(coding[!is.na(coding$GENEID)], 3)
 head(coding[coding$CONSEQUENCE == "frameshift"], 3)
+head(coding[!is.na(coding$GENEID)], 3)
 ```
 
 Those methods can be used to identify variants on specific genes, for example BRAF (Gene ID: 673).
@@ -179,25 +178,31 @@ gene_coding[gene_coding$GENEID == "673"]
 </ul>
 </details>
 
-```{r, include = FALSE}
-nms <- names(coding)
-idx <- mcols(coding)$CONSEQUENCE == "nonsynonymous"
-nonsyn <- coding[idx]
-names(nonsyn) <- nms[idx]
-rsids <- unique(names(nonsyn)[grep("rs", names(nonsyn), fixed=TRUE)])
+#### *Match variants within COSMIC*
+
+**This part is not working as intended, and help needed!**
+
+Read and pre-process COSMIC database.
+
+```{r, eval = TRUE}
+cosmic_path <- system.file("vcf", "cosmic_67.vcf.gz", package = "COSMIC.67")
+cosmic_db <- readVcf(cosmic_path, genome = "GRCh37")
+seqlevels(cosmic_db) <- paste0("chr", seqlevels(cosmic_db))
+cosmic_db = renameSeqlevels(cosmic_db, c(chrMT="chrM"))
 ```
 
-```{r, include = FALSE}
-library(PolyPhen.Hsapiens.dbSNP131)
-pp <- select(PolyPhen.Hsapiens.dbSNP131, keys=rsids, cols=c("TRAININGSET", "PREDICTION", "PPH2PROB"))
-head(pp[!is.na(pp$PREDICTION)])
+The `match()` function only matches chromosome and ranges but not *ALT*.
+
+```{r, eval = TRUE}
+variant_loc <- rowRanges(vcf)
+cosmic_loc <- rowRanges(cosmic_db)
+overlap <- match(cosmic_loc, variant_loc)
+cosmic_overlap <- cosmic_loc[!is.na(overlap)]
 ```
 
-```{r, include = FALSE}
-data(package = "COSMIC.67")
-data(cosmic_67, package="COSMIC.67")
-tp53_range = GRanges("17", IRanges(7565097, 7590856))
-vcf_path = system.file("vcf", "cosmic_67.vcf.gz", package = "COSMIC.67")
-cosmic_tp53 = readVcf(vcf_path, genome = "GRCh37", ScanVcfParam(which = tp53_range))
-cosmic_tp53
+The bug can be identified from the BRAF V600E example.
+
+```{r, eval = TRUE}
+variant_loc[ranges(variant_loc) == "140453136"]
+cosmic_overlap[start(ranges(cosmic_overlap)) == "140453136"]
 ```
