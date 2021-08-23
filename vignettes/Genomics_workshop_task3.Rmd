@@ -1,8 +1,9 @@
 ---
 title: "Genomics Workshop: Task 3"
 author: 
-  Ruining Dong^[dong.rn@wehi.edu.au], 
-  James Fu, Daniel Cameron
+  - Ruining Dong^[dong.rn@wehi.edu.au]
+  - James Fu^[fu.j@wehi.edu.au]
+  - Daniel Cameron^[cameron.d@wehi.edu.au]
 output: 
   rmarkdown::html_vignette
 vignette: >
@@ -11,21 +12,192 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-
-```{r, include = FALSE}
-knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>"
-)
-```
-
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, eval = FALSE)
 ```
 
-## COSMIC
+### Task 3: investigating the driver gene
 
+#### *Load packages*
 
+```{r, eval = TRUE, message = FALSE}
+library(VariantAnnotation)
+library(TxDb.Hsapiens.UCSC.hg19.knownGene)
+library(BSgenome.Hsapiens.UCSC.hg19)
+```
 
+#### *Read and pre-process VCF file*
 
+We use the `VariantAnnotation` package to read and annotate the SNVs we just found.
 
+```{r, eval = TRUE}
+setwd('~/Documents/Codes_Data/2021_wehi_summer_school/IntroductionToGenomicsWorkshop/')
+file_dir <- "./data/full/strelka/COLO829R_COLO829T_strelka_passed.somatic.merged.vcf"
+vcf <- readVcf(file_dir)
+```
+
+The VCF file is modified to maintain its consistency with other databases.
+
+```{r, eval = TRUE}
+seqlevels(vcf) <- paste0("chr", seqlevels(vcf))
+vcf = renameSeqlevels(vcf, c(chrMT="chrM"))
+seqlengths(vcf)["chrM"] <- 16571
+```
+
+#### *Header information of VCF file*
+
+`header()` function will show the header information from the VCF file.
+
+```{r, eval = TRUE}
+header(vcf)
+```
+
+Further information for the headers can be extracted by functions like `samples(), geno(), meta()`, etc.
+
+<details>
+<summary>Solution</summary>
+<ul>
+<li>This will fail.</li>
+```{r, eval = TRUE, error = TRUE}
+samples(vcf)
+```
+<li>These will work.</li>
+```{r, eval = TRUE}
+samples(header(vcf))
+```
+<li>**Worth mentioning? Explanation?**</li>
+```{r, eval = TRUE}
+geno(vcf)
+head(geno(header(vcf)), 3)
+```
+</ul>
+</details>
+
+#### *Variant genomic position*
+
+The chromosomal location for each SNV can be identified by `rowRanges()`.
+
+```{r, eval = TRUE}
+head(rowRanges(vcf), 3)
+```
+
+Individual fields can be pulled out either with the `$` sign or named accessors like `ref(), alt()`.
+
+```{r, eval = TRUE}
+head(rowRanges(vcf)$ALT, 3)
+head(alt(vcf), 3)
+```
+
+#### *Locate variants in and around genes*
+
+Variant location with respect to genes can be identified with the `locateVariants()` function.
+
+```{r, eval = TRUE, message = FALSE, warning = FALSE}
+# Get variant location information.
+rd <- rowRanges(vcf)
+txdb <- TxDb.Hsapiens.UCSC.hg19.knownGene
+loc <- locateVariants(rd, txdb, CodingVariants())
+head(loc, 3)
+```
+
+The number of SNVs on each chromosome can be displayed by `seqnames()`.
+
+```{r, eval = TRUE, warning = FALSE}
+seqnames(loc)
+```
+
+The documentation of `locateVariants()` describes how to identify variants in other regions, like *splicing sites*.
+
+<details>
+<summary>Solution</summary>
+<ul>
+<li>Check the documentation of `locateVariants()`.</li>
+```{r, eval = TRUE}
+?locateVariants
+```
+<li>
+Following functions are used to identify variants in distinct gene regions:
+
+| Function             | Description                                                           |
+|----------------------|-----------------------------------------------------------------------|
+| CodingVariants()     | Falls within a coding region                                          |
+| IntronVariants()     | Falls within an intron region                                         |
+| FiveUTRVariants()    | Falls within a 5' untranslated region                                 |
+| ThreeUTRVariants()   | Falls within a 3' untranslated region                                 |
+| IntergenicVariants() | Does not fall within a transcript associated with a gene              |
+| SpliceSiteVariants() | Overlaps any portion of the first 2 or last 2 nucleotide of an intron |
+| PromoterVariants()   | Falls within a promoter region of a transcript                        |
+| AllVariants()        | All regions                                                           |
+</li>
+```{r, eval = TRUE, message = FALSE}
+loc_splice <- locateVariants(rd, txdb, SpliceSiteVariants())
+head(loc_splice, 3)
+seqnames(loc_splice)
+```
+</ul>
+</details>
+
+#### *Amino acid coding changes*
+
+`predictCoding` computes amino acid coding changes for non-synonymous mutations.
+
+```{r, eval = TRUE, warning = FALSE}
+coding <- predictCoding(vcf, txdb, seqSource = Hsapiens)
+coding[3:4]
+```
+
+Here shows all consequences of coding variants.
+
+```{r, eval = TRUE}
+unique(coding$CONSEQUENCE)
+```
+
+The coding result can be filtered by different syntaxes and functions.
+**Why are there variants without genes?**
+
+```{r, eval = TRUE}
+head(coding[!is.na(coding$GENEID)], 3)
+head(coding[coding$CONSEQUENCE == "frameshift"], 3)
+```
+
+Those methods can be used to identify variants on specific genes, for example BRAF (Gene ID: 673).
+
+<details>
+<summary>Solution</summary>
+<ul>
+<li>You can't filter on column with NA values.</li>
+```{r, eval = TRUE, error = TRUE}
+coding[coding$GENEID == "673"]
+```
+<li>Instead, you should filter out the NA values first.</li>
+```{r, eval = TRUE}
+gene_coding <- coding[!is.na(coding$GENEID)]
+gene_coding[gene_coding$GENEID == "673"]
+```
+<li>You can further investigate this variant on external databases like [COSMIC](https://cancer.sanger.ac.uk/cosmic/mutation/overview?id=170110762).</li>
+
+</ul>
+</details>
+
+```{r, include = FALSE}
+nms <- names(coding)
+idx <- mcols(coding)$CONSEQUENCE == "nonsynonymous"
+nonsyn <- coding[idx]
+names(nonsyn) <- nms[idx]
+rsids <- unique(names(nonsyn)[grep("rs", names(nonsyn), fixed=TRUE)])
+```
+
+```{r, include = FALSE}
+library(PolyPhen.Hsapiens.dbSNP131)
+pp <- select(PolyPhen.Hsapiens.dbSNP131, keys=rsids, cols=c("TRAININGSET", "PREDICTION", "PPH2PROB"))
+head(pp[!is.na(pp$PREDICTION)])
+```
+
+```{r, include = FALSE}
+data(package = "COSMIC.67")
+data(cosmic_67, package="COSMIC.67")
+tp53_range = GRanges("17", IRanges(7565097, 7590856))
+vcf_path = system.file("vcf", "cosmic_67.vcf.gz", package = "COSMIC.67")
+cosmic_tp53 = readVcf(vcf_path, genome = "GRCh37", ScanVcfParam(which = tp53_range))
+cosmic_tp53
+```
