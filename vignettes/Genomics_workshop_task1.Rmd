@@ -6,7 +6,7 @@ author:
 output: 
   rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Genomic Workshop}
+  %\VignetteIndexEntry{Genomic Workshop Task 1}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -26,8 +26,15 @@ knitr::opts_chunk$set(echo = TRUE, eval = FALSE)
 ## BWA
 
 ```{bash}
-bwa mem ...
+bwa mem -t $(nproc) chr7.fa normal_R1.fastq.gz normal_R2.fastq.gz | samtools sort -@ $(nproc) - > normal.bam
+bwa mem -t $(nproc) chr7.fa tumour_R1.fastq.gz tumour_R2.fastq.gz | samtools sort -@ $(nproc) - > tumour.bam
+samtools index normal.bam
+samtools index tumour.bam
+configureStrelkaSomaticWorkflow.py --normalBam normal.bam --tumorBam tumour.bam --referenceFasta chr7.fa --runDir strelka
+strelka/runWorkflow.py -j $(nproc) -m local
 ```
+
+https://github.com/Illumina/strelka/blob/v2.9.x/docs/userGuide/quickStart.md
 
 ## samtools
 
