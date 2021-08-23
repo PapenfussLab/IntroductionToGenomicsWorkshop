@@ -16,12 +16,13 @@ RUN wget https://github.com/Illumina/strelka/releases/download/v2.9.10/strelka-2
 	&& rm -r strelka-2.9.10.centos6_x86_64*
 
 # Create reference genome
-WORKDIR /home/rstudio/data
-
+WORKDIR /home/rstudio/colo829
 RUN wget http://hgdownload.cse.ucsc.edu/goldenpath/hg19/chromosomes/chr7.fa.gz \
 	&& gunzip chr7.fa.gz \
 	&& samtools faidx chr7.fa \
 	&& bwa index chr7.fa
+
+WORKDIR /home/rstudio
 
 RUN Rscript -e "options(repos = c(CRAN = 'https://cran.r-project.org')); BiocManager::install(c('TxDb.Hsapiens.UCSC.hg19.knownGene', 'BSgenome.Hsapiens.UCSC.hg19', 'PolyPhen.Hsapiens.dbSNP131', 'VariantAnnotation', 'BioBase', 'tidyverse'), ask=FALSE)"
 
