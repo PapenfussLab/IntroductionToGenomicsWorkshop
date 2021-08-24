@@ -52,8 +52,11 @@ If you run into any problems, please describe the issue and send via zoom chat. 
 * [samtools](http://www.htslib.org/doc/samtools.html)
 * [Strelka2](https://github.com/Illumina/strelka)
 * [VariantAnnotation](https://bioconductor.org/packages/release/bioc/html/VariantAnnotation.html)
+* [TxDb.Hsapiens.UCSC.hg19.knownGene](https://bioconductor.org/packages/release/data/annotation/html/TxDb.Hsapiens.UCSC.hg19.knownGene.html)
+* [BSgenome.Hsapiens.UCSC.hg19](https://bioconductor.org/packages/release/data/annotation/html/BSgenome.Hsapiens.UCSC.hg19.html)
+* [COSMIC.67](https://bioconductor.org/packages/release/data/experiment/html/COSMIC.67.html)
+* [org.Hs.eg.db](https://bioconductor.org/packages/release/data/annotation/html/org.Hs.eg.db.html)
 * [COSMIC](https://cancer.sanger.ac.uk/cosmic)
-**To be updated**
 
 ### Time outline
 
@@ -267,6 +270,7 @@ If you navigate to the `colo829/strelka/results/variants/` directory, you should
 library(VariantAnnotation)
 library(TxDb.Hsapiens.UCSC.hg19.knownGene)
 library(BSgenome.Hsapiens.UCSC.hg19)
+library(org.Hs.eg.db)
 ```
 
 #### *Read and pre-process VCF file*
@@ -276,15 +280,11 @@ We use the `VariantAnnotation` package to read and annotate the SNVs we just fou
 ```{r, eval = TRUE}
 file_dir <- "../inst/extdata/COLO829R_COLO829T_strelka_passed.somatic.merged.vcf"
 vcf <- readVcf(file_dir)
-# vcf <- readVcf(system.file("extdata", "COLO829R_COLO829T_strelka_passed.somatic.merged.vcf", package = "IntroductionToGenomicsWorkshop"))
 ```
 
-The VCF file is modified to maintain its consistency with other databases.
+Variant sequence style is changed to maintain its consistency with other databases.
 
 ```{r, eval = TRUE}
-# seqlevels(vcf) <- paste0("chr", seqlevels(vcf))
-# vcf = renameSeqlevels(vcf, c(chrMT="chrM"))
-# seqlengths(vcf)["chrM"] <- 16571
 seqlevelsStyle(vcf) <- "UCSC"
 ```
 
@@ -308,9 +308,6 @@ samples(vcf)
 <li>These will work.</li>
 ```{r, eval = TRUE}
 samples(header(vcf))
-```
-<li>**Worth mentioning? Explanation?**</li>
-```{r, eval = TRUE}
 geno(vcf)
 head(geno(header(vcf)), 3)
 ```
@@ -341,6 +338,15 @@ Variant location with respect to genes can be identified with the `locateVariant
 rd <- rowRanges(vcf)
 txdb <- TxDb.Hsapiens.UCSC.hg19.knownGene
 loc <- locateVariants(rd, txdb, CodingVariants())
+head(loc, 3)
+```
+
+Gene ID can be replaced my gene symbols which are more readable, using `org.HS.eg.db` database.
+
+```{r, eval = TRUE, message = FALSE}
+gene_symbol <- biomaRt::select(org.Hs.eg.db, keys=loc$GENEID, columns=c("SYMBOL"), keytype="ENTREZID")$SYMBOL
+head(gene_symbol, 5)
+loc$SYMBOl <- gene_symbol
 head(loc, 3)
 ```
 
@@ -397,28 +403,32 @@ unique(coding$CONSEQUENCE)
 ```
 
 The coding result can be filtered by different syntaxes and functions. 
-**Why are there variants without genes? And duplicates?**
 
 ```{r, eval = TRUE}
 head(coding[coding$CONSEQUENCE == "frameshift"], 3)
 head(coding[!is.na(coding$GENEID)], 3)
 ```
 
-Those methods can be used to identify variants on specific genes, for example BRAF (Gene ID: 673).
+Those methods can be used to identify variants on specific genes, for example "BRAF".
 
 <details>
 <summary>Solution</summary>
 <ul>
+<li>We first map gene IDs to gene names.</li>
+```{r, eval = TRUE, message = FALSE}
+coding$SYMBOL <- biomaRt::select(org.Hs.eg.db, keys=coding$GENEID, columns=c("SYMBOL"), keytype="ENTREZID")$SYMBOL
+```
 <li>You can't filter on column with NA values.</li>
 ```{r, eval = TRUE, error = TRUE}
-coding[coding$GENEID == "673"]
+coding[coding$SYMBOL == "BRAF"]
 ```
 <li>Instead, you should filter out the NA values first.</li>
 ```{r, eval = TRUE}
-gene_coding <- coding[!is.na(coding$GENEID)]
-gene_coding[gene_coding$GENEID == "673"]
+gene_coding <- coding[!is.na(coding$SYMBOL)]
+gene_coding[gene_coding$SYMBOL == "BRAF"]
 ```
 <li>You can further investigate this variant on external databases like [COSMIC](https://cancer.sanger.ac.uk/cosmic/mutation/overview?id=170110762).</li>
+*TO BE REMOVED*
 
 </ul>
 </details>
@@ -432,8 +442,7 @@ Read and pre-process COSMIC database.
 ```{r, eval = TRUE}
 cosmic_path <- system.file("vcf", "cosmic_67.vcf.gz", package = "COSMIC.67")
 cosmic_db <- readVcf(cosmic_path, genome = "GRCh37")
-seqlevels(cosmic_db) <- paste0("chr", seqlevels(cosmic_db))
-cosmic_db = renameSeqlevels(cosmic_db, c(chrMT="chrM"))
+seqlevelsStyle(cosmic_db) <- "UCSC"
 ```
 
 The `match()` function only matches chromosome and ranges but not *ALT*.
@@ -452,8 +461,14 @@ variant_loc[ranges(variant_loc) == "140453136"]
 cosmic_overlap[start(ranges(cosmic_overlap)) == "140453136"]
 ```
 
-biomaRt::select(org.Hs.eg.db, keys=genes(txdb)$gene_id, columns=c("SYMBOL"), keytype="ENTREZID")$SYMBOL
+Assume the previous overlapping code works.
 
+```{r, eval = TRUE}
+overlap_cos_id <- names(cosmic_overlap)
+overlap_info <- info(cosmic_db)[overlap_cos_id,]
+overlap_info <- overlap_info[!is.na(overlap_info$CNT),]
+overlap_info[order(overlap_info$CNT),]
+```
 
 
 <!-- <details> -->
