@@ -31,7 +31,7 @@ library(BSgenome.Hsapiens.UCSC.hg19)
 We use the `VariantAnnotation` package to read and annotate the SNVs we just found.
 
 ```{r, eval = TRUE}
-file_dir <- "/home/rstudio/colo829/full/strelka/COLO829R_COLO829T_strelka_passed.somatic.merged.vcf"
+file_dir <- "../colo829/full/strelka/COLO829R_COLO829T_strelka_passed.somatic.merged.vcf"
 vcf <- readVcf(file_dir)
 ```
 
