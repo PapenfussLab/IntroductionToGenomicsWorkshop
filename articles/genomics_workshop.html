@@ -54,15 +54,6 @@
   </a>
   <ul class="dropdown-menu" role="menu">
 <li>
-      <a href="../articles/Genomics_workshop_task1.html">Genomics Workshop: Task 1</a>
-    </li>
-    <li>
-      <a href="../articles/Genomics_workshop_task2.html">Genomics Workshop: Task 2</a>
-    </li>
-    <li>
-      <a href="../articles/Genomics_workshop_task3.html">Genomics Workshop: Task 3</a>
-    </li>
-    <li>
       <a href="../articles/genomics_workshop.html">Genomics Workshop</a>
     </li>
   </ul>
@@ -133,6 +124,7 @@
 <li><a href="http://bio-bwa.sourceforge.net/bwa.shtml">bwa</a></li>
 <li><a href="http://www.htslib.org/doc/samtools.html">samtools</a></li>
 <li><a href="https://github.com/Illumina/strelka">Strelka2</a></li>
+<li><a href="https://bioconductor.org/packages/release/bioc/html/VariantAnnotation.html">VariantAnnotation</a></li>
 <li>
 <a href="https://cancer.sanger.ac.uk/cosmic">COSMIC</a> <strong>To be updated</strong>
 </li>
@@ -204,14 +196,24 @@
 <a href="#workshop" class="anchor"></a>Workshop</h2>
 <div id="getting-started" class="section level3">
 <h3 class="hasAnchor">
-<a href="#getting-started" class="anchor"></a>Getting started:</h3>
+<a href="#getting-started" class="anchor"></a>Getting started</h3>
 <ol style="list-style-type: decimal">
 <li>Rstudio working environment (console vs. terminal)</li>
 <li>Data directory</li>
 <li>Working with UNIX commands</li>
+</ol>
+<p><em>working directories</em></p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> colo829</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ls</span></span></code></pre></div>
+<p><em>running cmd tools</em></p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">samtools</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">man</span> samtools <span class="co">#q for quitting the man page</span></span></code></pre></div>
+<p><em>piping</em></p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ls</span> <span class="kw">|</span> <span class="fu">head</span> <span class="at">-3</span></span></code></pre></div>
+<ol start="4" style="list-style-type: decimal">
 <li>SNV analysis workflow (<strong>image to be updated</strong>)</li>
 </ol>
-<p><img src="../inst/images/Example-of-a-best-practices-SNV-calling-workflow-for-somatic-exome-and-genome-data.png" width="425"></p>
+<p><img src="../../../../tmp/RtmpTd8yqI/temp_libpath6f316ac3b94/IntroductionToGenomicsWorkshop/extdata/snvWorkflow.png" width="425"></p>
 </div>
 <div id="task-1-read-alignments-sorting-and-indexing" class="section level3">
 <h3 class="hasAnchor">
@@ -221,63 +223,502 @@
 <h4 class="hasAnchor">
 <a href="#aligning-reads-to-the-reference-genome" class="anchor"></a><em>Aligning reads to the reference genome</em>
 </h4>
-<p>First, we need to map the sequencing reads to the reference genome. The reads can be found at <code>/path/to/fastq</code>, and the reference genome is located at <code>/path/to/fa</code>.</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">bwa</span> mem [options] <span class="op">&lt;</span>idxbase<span class="op">&gt;</span> <span class="op">&lt;</span>in1.fq<span class="op">&gt;</span> [in2.fq] <span class="op">&gt;</span> colo829.sam</span></code></pre></div>
+<p>Typical human whole genome sequencing (WGS) data contains hundreds of millions or billions of reads. These data sets take many hours to align so for this workshop we are going to align a very small subset of real sequencing data.</p>
+<p>The data we are using today is located in the colo829 directory. The reads can be found at <code>/home/rstudio/colo829/*.fastq.gz</code>, and the reference genome is located at <code>/home/rstudio/colo829/chr7.fa</code>.</p>
+<p>Sequence alignment tools are command-line tools so for this first task, we are going to use the command-line terminal.</p>
+<p>To start, let us navigate to the directory containing our data.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> colo829</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ls</span></span></code></pre></div>
+<p>The <code>cd</code> command is the “change directory” command. It changes our working directory from our “home” directory to the colo829 directory.</p>
+<p>The <code>ls</code> command is the “list” command. It outputs all the files and directories in the current directory.</p>
+<p>Our input data is paired-end sequencing data for a tumour sample and a matched normal.</p>
+<p>This <code>fastq</code> files are output from the sequencing machine and we need to align them to the reference genome. In this workshop, we are going to use chromosome 7 of the hg19 human reference genome as our reference.</p>
+<p>We will use <code>bwa mem</code> for our sequence alignment. If we type:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">bwa</span> mem</span></code></pre></div>
+<p>We see that <code>bwa mem</code> requires a reference genome, input file(s), and has many optional parameters. The reference genome is <code>chr7.fa</code>, and the files that start with <code>chr7.fa.</code>.</p>
+<details><summary>
+Hint
+</summary><ul>
+<div class="sourceCode" id="cb6"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ex">bwa</span> mem [options] <span class="op">&lt;</span>idxbase<span class="op">&gt;</span> <span class="op">&lt;</span>in1.fq<span class="op">&gt;</span> [in2.fq] <span class="op">&gt;</span> colo829.sam</span></code></pre></div>
+</ul></details>
 </div>
 <div id="converting-the-output-file-format" class="section level4">
 <h4 class="hasAnchor">
 <a href="#converting-the-output-file-format" class="anchor"></a><em>Converting the output file format</em>
 </h4>
-<p>To be updated</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">#bwa mem [options] &lt;idxbase&gt; &lt;in1.fq&gt; [in2.fq] &gt; colo829.sam</span></span></code></pre></div>
+<p>The output file of <code>bwa mem</code> can be saved as a <code>SAM</code> file, standing for Sequence Alignment Map. For storage efficiency, <code>SAM</code> files are often losslessly compressed to <code>BAM</code> format, standing for Binary Alignment Map.</p>
+<p>Try it yourself by modifying this template:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="ex">samtools</span> view <span class="at">-S</span> <span class="at">-b</span> output.sam <span class="at">-o</span> output.bam</span></code></pre></div>
+<p>This step is optional if you “pipe” your <code>bwa</code> output to <code>samtools</code> (see below).</p>
 </div>
 <div id="sorting-and-indexing" class="section level4">
 <h4 class="hasAnchor">
 <a href="#sorting-and-indexing" class="anchor"></a><em>Sorting and indexing</em>
 </h4>
-<p>To be updated</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">#bwa mem [options] &lt;idxbase&gt; &lt;in1.fq&gt; [in2.fq] &gt; colo829.sam</span></span></code></pre></div>
+<p>We also need to sort the output of <code>bwa</code> into the order in which they align in the reference genome. For this we will use <code>samtools sort</code>:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="ex">samtools</span> sort</span></code></pre></div>
+<p>and <code>samtools index</code>:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="ex">samtools</span> index</span></code></pre></div>
+<p>To avoid writing additional (uncompressed) files, we will combine the alignment and sorting steps together with a unix “pipe”. A pipe <code><a href="https://rdrr.io/r/base/Logic.html">|</a></code> takes the output from one program and sends it to the next program.</p>
+<p>We can run our <code>bwa</code> and <code>samtools</code> commands together in a pipe using:</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="ex">bwa</span> mem chr7.fa normal_R1.fastq.gz normal_R2.fastq.gz <span class="kw">|</span> <span class="ex">samtools</span> sort <span class="at">-</span> <span class="op">&gt;</span> normal.bam</span></code></pre></div>
+<p>Our variant caller requires a index file for our <code>normal.bam</code> file so we create this using <code>samtools index</code>:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="ex">samtools</span> index normal.bam</span></code></pre></div>
+<p>As we are doing somatic variant calling, we need to repeat these steps on the tumour sequencing reads as well. Our tumour data is larger than our normal so to reduce the time it takes to perform alignment, we’ll tell <code>bwa mem</code> that it can use both CPU cores available to us in our workshop virtual machines by telling it to use 2 threads.</p>
+<p>Now please try applying all the above steps on the tumour reads.</p>
 <details><summary>
-Solution (interactively)
+Solution
 </summary><ul>
-<li>
-First do this.
-</li>
-<div class="sourceCode" id="cb4"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">bwa</span> index ref.fa</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="ex">bwa</span> mem ref.fa read1.fq read2.fq <span class="op">&gt;</span> output.sam</span></code></pre></div>
-<li>
-Then do that.
-</li>
-<div class="sourceCode" id="cb5"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">samtools</span> view <span class="at">-S</span> <span class="at">-b</span> output.sam <span class="at">-o</span> output.bam <span class="co">#converting SAM to BAM</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="ex">samtools</span> sort output.bam output.sorted <span class="co">#sorting the BAM reads</span></span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="ex">samtools</span> index output.sorted.bam <span class="co">#indexing the sorted BAM</span></span></code></pre></div>
-<li>
-OR, pipe some of the commands in a one-liner:
-</li>
-<div class="sourceCode" id="cb6"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ex">bwa</span> mem ref.fa read1.fq read2.fq <span class="kw">|</span> <span class="ex">samtools</span> view <span class="at">-S</span> <span class="at">-b</span> <span class="at">-</span> <span class="kw">|</span> <span class="ex">samtools</span> sort <span class="at">-o</span> output.sorted.bam <span class="at">-</span></span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="ex">samtools</span> index output.sorted.bam</span></code></pre></div>
-<li>
-Blah blah.
-</li>
-<li>
-You should be able to see the resultant files <code>file1</code> and <code>file2</code>.
-</li>
+<div class="sourceCode" id="cb12"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="ex">bwa</span> mem <span class="at">-t</span> 2 chr7.fa tumour_R1.fastq.gz tumour_R2.fastq.gz <span class="kw">|</span> <span class="ex">samtools</span> sort <span class="at">-</span> <span class="op">&gt;</span> tumour.bam</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="ex">samtools</span> index tumour.bam</span></code></pre></div>
 </ul></details>
 </div>
 </div>
 <div id="task-2-calling-snvs-using-strelka2" class="section level3">
 <h3 class="hasAnchor">
 <a href="#task-2-calling-snvs-using-strelka2" class="anchor"></a>Task 2: calling SNVs using Strelka2</h3>
-<p>Now that we have the sequencing reads in order, we will start calling SNVs. Blah blah…</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co">#strelka example command</span></span></code></pre></div>
+<p>Now that we have the sequencing reads in order, we will start calling SNVs. We now have both the normal and tumour inputs ready for variant calling. In a real pipeline, there are additional quality control, adapter trimming, and duplicate filtering steps but for this workshop, the data has been pre-processed for us so we can skip these steps.</p>
+<p>The variant caller we are using is <a href="https://github.com/Illumina/strelka/blob/v2.9.x/docs/userGuide/quickStart.md">Strelka2</a>. Looking through the quick start guide, we can see that Strelka2 supports both somatic and germline variant calling. As we are doing somatic variant calling, we want to configure a somatic Strelka workflow</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="ex">configureStrelkaSomaticWorkflow.py</span> <span class="dt">\</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">--normalBam</span> normal.bam <span class="dt">\</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">--tumorBam</span> tumour.bam <span class="dt">\</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">--referenceFasta</span> chr7.fa <span class="dt">\</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">--runDir</span> strelka</span></code></pre></div>
+<p>This created a <code>strelka</code> subdirectory containing <code>runWorkflow.py</code> which is the command we will use to run Strelka.</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="ex">strelka/runWorkflow.py</span></span></code></pre></div>
+<p>As we can see from the usage message, Strelka requires additional arguments. In our case, we want to specify that we will be running it on the same computer that we are running the <code>runWorkflow.py</code> command. We will also tell Strelka that it can use both the CPU cores available to us.</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="ex">strelka/runWorkflow.py</span> <span class="at">-j</span> 2 <span class="at">-m</span> local</span></code></pre></div>
+<p>If you navigate to the <code>colo829/strelka/results/variants/</code> directory, you should now have a <code>somatic.snvs.vcf.gz</code> file containing the somatic variants that Strelka detected in our example sequencing data.</p>
 </div>
 <div id="task-3-investigating-the-driver-gene" class="section level3">
 <h3 class="hasAnchor">
 <a href="#task-3-investigating-the-driver-gene" class="anchor"></a>Task 3: investigating the driver gene</h3>
-<p>Text text</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co">#install.packages()</span></code></pre></div>
+<div id="load-packages" class="section level4">
+<h4 class="hasAnchor">
+<a href="#load-packages" class="anchor"></a><em>Load packages</em>
+</h4>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">VariantAnnotation</span><span class="op">)</span>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">TxDb.Hsapiens.UCSC.hg19.knownGene</span><span class="op">)</span>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">BSgenome.Hsapiens.UCSC.hg19</span><span class="op">)</span></code></pre></div>
+</div>
+<div id="read-and-pre-process-vcf-file" class="section level4">
+<h4 class="hasAnchor">
+<a href="#read-and-pre-process-vcf-file" class="anchor"></a><em>Read and pre-process VCF file</em>
+</h4>
+<p>We use the <code>VariantAnnotation</code> package to read and annotate the SNVs we just found.</p>
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">vcf</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/VariantAnnotation/man/readVcf-methods.html">readVcf</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"strelka.somatic.vcf"</span>, package <span class="op">=</span> <span class="st">"IntroductionToGenomicsWorkshop"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<p>The VCF file is modified to maintain its consistency with other databases.</p>
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="co"># seqlevels(vcf) &lt;- paste0("chr", seqlevels(vcf))</span>
+<span class="co"># vcf = renameSeqlevels(vcf, c(chrMT="chrM"))</span>
+<span class="co"># seqlengths(vcf)["chrM"] &lt;- 16571</span>
+<span class="fu">seqlevelsStyle</span><span class="op">(</span><span class="va">vcf</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="st">"UCSC"</span></code></pre></div>
+</div>
+<div id="header-information-of-vcf-file" class="section level4">
+<h4 class="hasAnchor">
+<a href="#header-information-of-vcf-file" class="anchor"></a><em>Header information of VCF file</em>
+</h4>
+<p><code><a href="https://rdrr.io/pkg/VariantAnnotation/man/VCFHeader-class.html">header()</a></code> function will show the header information from the VCF file.</p>
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/VariantAnnotation/man/VCFHeader-class.html">header</a></span><span class="op">(</span><span class="va">vcf</span><span class="op">)</span>
+<span class="co">#&gt; class: VCFHeader </span>
+<span class="co">#&gt; samples(2): NORMAL TUMOR</span>
+<span class="co">#&gt; meta(12): cmdline content ... startTime contig</span>
+<span class="co">#&gt; fixed(1): FILTER</span>
+<span class="co">#&gt; info(22): AC AF ... TQSS_NT set</span>
+<span class="co">#&gt; geno(15): AU CU ... TOR TU</span></code></pre></div>
+<p>Further information for the headers can be extracted by functions like <code>samples(), geno(), meta()</code>, etc.</p>
+<details><summary>
+Solution
+</summary><ul>
+<li>
+This will fail.
+</li>
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/VariantAnnotation/man/VCFHeader-class.html">samples</a></span><span class="op">(</span><span class="va">vcf</span><span class="op">)</span>
+<span class="co">#&gt; Error in (function (classes, fdef, mtable) : unable to find an inherited method for function 'samples' for signature '"CollapsedVCF"'</span></code></pre></div>
+<li>
+These will work.
+</li>
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/VariantAnnotation/man/VCFHeader-class.html">samples</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/VariantAnnotation/man/VCFHeader-class.html">header</a></span><span class="op">(</span><span class="va">vcf</span><span class="op">)</span><span class="op">)</span>
+<span class="co">#&gt; [1] "NORMAL" "TUMOR"</span></code></pre></div>
+<li>
+<strong>Worth mentioning? Explanation?</strong>
+</li>
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/VariantAnnotation/man/VCF-class.html">geno</a></span><span class="op">(</span><span class="va">vcf</span><span class="op">)</span>
+<span class="co">#&gt; List of length 15</span>
+<span class="co">#&gt; names(15): AU CU DP DP2 DP50 FDP FDP50 GU SDP SUBDP SUBDP50 TAR TIR TOR TU</span>
+<span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/VariantAnnotation/man/VCF-class.html">geno</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/VariantAnnotation/man/VCFHeader-class.html">header</a></span><span class="op">(</span><span class="va">vcf</span><span class="op">)</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span>
+<span class="co">#&gt; DataFrame with 3 rows and 3 columns</span>
+<span class="co">#&gt;         Number        Type            Description</span>
+<span class="co">#&gt;    &lt;character&gt; &lt;character&gt;            &lt;character&gt;</span>
+<span class="co">#&gt; AU           2     Integer Number of 'A' allele..</span>
+<span class="co">#&gt; CU           2     Integer Number of 'C' allele..</span>
+<span class="co">#&gt; DP           1     Integer   Read depth for tier1</span></code></pre></div>
+</ul></details>
+</div>
+<div id="variant-genomic-position" class="section level4">
+<h4 class="hasAnchor">
+<a href="#variant-genomic-position" class="anchor"></a><em>Variant genomic position</em>
+</h4>
+<p>The chromosomal location for each SNV can be identified by <code>rowRanges()</code>.</p>
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="fu">rowRanges</span><span class="op">(</span><span class="va">vcf</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span>
+<span class="co">#&gt; GRanges object with 3 ranges and 5 metadata columns:</span>
+<span class="co">#&gt;                seqnames    ranges strand | paramRangeID            REF</span>
+<span class="co">#&gt;                   &lt;Rle&gt; &lt;IRanges&gt;  &lt;Rle&gt; |     &lt;factor&gt; &lt;DNAStringSet&gt;</span>
+<span class="co">#&gt;    1:10250_A/C     chr1     10250      * |           NA              A</span>
+<span class="co">#&gt;    1:10257_A/C     chr1     10257      * |           NA              A</span>
+<span class="co">#&gt;   1:533197_A/G     chr1    533197      * |           NA              A</span>
+<span class="co">#&gt;                               ALT      QUAL      FILTER</span>
+<span class="co">#&gt;                &lt;DNAStringSetList&gt; &lt;numeric&gt; &lt;character&gt;</span>
+<span class="co">#&gt;    1:10250_A/C                  C        NA        PASS</span>
+<span class="co">#&gt;    1:10257_A/C                  C        NA        PASS</span>
+<span class="co">#&gt;   1:533197_A/G                  G        NA        PASS</span>
+<span class="co">#&gt;   -------</span>
+<span class="co">#&gt;   seqinfo: 25 sequences from an unspecified genome</span></code></pre></div>
+<p>Individual fields can be pulled out either with the <code><a href="https://rdrr.io/r/base/Extract.html">$</a></code> sign or named accessors like <code><a href="https://rdrr.io/pkg/VariantAnnotation/man/VCF-class.html">ref()</a></code>, <code><a href="https://rdrr.io/pkg/VariantAnnotation/man/VCF-class.html">alt()</a></code>.</p>
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="fu">rowRanges</span><span class="op">(</span><span class="va">vcf</span><span class="op">)</span><span class="op">$</span><span class="va">ALT</span>, <span class="fl">3</span><span class="op">)</span>
+<span class="co">#&gt; DNAStringSetList of length 3</span>
+<span class="co">#&gt; [[1]] C</span>
+<span class="co">#&gt; [[2]] C</span>
+<span class="co">#&gt; [[3]] G</span>
+<span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/VariantAnnotation/man/VCF-class.html">alt</a></span><span class="op">(</span><span class="va">vcf</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span>
+<span class="co">#&gt; DNAStringSetList of length 3</span>
+<span class="co">#&gt; [[1]] C</span>
+<span class="co">#&gt; [[2]] C</span>
+<span class="co">#&gt; [[3]] G</span></code></pre></div>
+</div>
+<div id="locate-variants-in-and-around-genes" class="section level4">
+<h4 class="hasAnchor">
+<a href="#locate-variants-in-and-around-genes" class="anchor"></a><em>Locate variants in and around genes</em>
+</h4>
+<p>Variant location with respect to genes can be identified with the <code><a href="https://rdrr.io/pkg/VariantAnnotation/man/locateVariants-methods.html">locateVariants()</a></code> function.</p>
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="co"># Get variant location information.</span>
+<span class="va">rd</span> <span class="op">&lt;-</span> <span class="fu">rowRanges</span><span class="op">(</span><span class="va">vcf</span><span class="op">)</span>
+<span class="va">txdb</span> <span class="op">&lt;-</span> <span class="va">TxDb.Hsapiens.UCSC.hg19.knownGene</span>
+<span class="va">loc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/VariantAnnotation/man/locateVariants-methods.html">locateVariants</a></span><span class="op">(</span><span class="va">rd</span>, <span class="va">txdb</span>, <span class="fu"><a href="https://rdrr.io/pkg/VariantAnnotation/man/VariantType-class.html">CodingVariants</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">loc</span>, <span class="fl">3</span><span class="op">)</span>
+<span class="co">#&gt; GRanges object with 3 ranges and 9 metadata columns:</span>
+<span class="co">#&gt;                seqnames    ranges strand | LOCATION  LOCSTART    LOCEND</span>
+<span class="co">#&gt;                   &lt;Rle&gt; &lt;IRanges&gt;  &lt;Rle&gt; | &lt;factor&gt; &lt;integer&gt; &lt;integer&gt;</span>
+<span class="co">#&gt;   1:883516_G/A     chr1    883516      - |   coding      1045      1045</span>
+<span class="co">#&gt;   1:883516_G/A     chr1    883516      - |   coding      1654      1654</span>
+<span class="co">#&gt;   1:883516_G/A     chr1    883516      - |   coding      1654      1654</span>
+<span class="co">#&gt;                  QUERYID        TXID         CDSID      GENEID       PRECEDEID</span>
+<span class="co">#&gt;                &lt;integer&gt; &lt;character&gt; &lt;IntegerList&gt; &lt;character&gt; &lt;CharacterList&gt;</span>
+<span class="co">#&gt;   1:883516_G/A        18        4114         12095       26155                </span>
+<span class="co">#&gt;   1:883516_G/A        18        4115         12095       26155                </span>
+<span class="co">#&gt;   1:883516_G/A        18        4116         12095       26155                </span>
+<span class="co">#&gt;                       FOLLOWID</span>
+<span class="co">#&gt;                &lt;CharacterList&gt;</span>
+<span class="co">#&gt;   1:883516_G/A                </span>
+<span class="co">#&gt;   1:883516_G/A                </span>
+<span class="co">#&gt;   1:883516_G/A                </span>
+<span class="co">#&gt;   -------</span>
+<span class="co">#&gt;   seqinfo: 25 sequences from an unspecified genome; no seqlengths</span></code></pre></div>
+<p>The number of SNVs on each chromosome can be displayed by <code>seqnames()</code>.</p>
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu">seqnames</span><span class="op">(</span><span class="va">loc</span><span class="op">)</span>
+<span class="co">#&gt; factor-Rle of length 918 with 23 runs</span>
+<span class="co">#&gt;   Lengths:    94    99    53    55    31 ...    66    12    10    14    27</span>
+<span class="co">#&gt;   Values : chr1  chr2  chr3  chr4  chr5  ... chr19 chr20 chr21 chr22 chrX </span>
+<span class="co">#&gt; Levels(25): chr1 chr2 chr3 chr4 chr5 chr6 ... chr20 chr21 chr22 chrX chrY chrM</span></code></pre></div>
+<p>The documentation of <code><a href="https://rdrr.io/pkg/VariantAnnotation/man/locateVariants-methods.html">locateVariants()</a></code> describes how to identify variants in other regions, like <em>splicing sites</em>.</p>
+<details><summary>
+Solution
+</summary><ul>
+<li>
+Check the documentation of <code><a href="https://rdrr.io/pkg/VariantAnnotation/man/locateVariants-methods.html">locateVariants()</a></code>.
+</li>
+<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="op">?</span><span class="va">locateVariants</span></code></pre></div>
+<li>
+<p>Following functions are used to identify variants in distinct gene regions:</p>
+<table class="table">
+<colgroup>
+<col width="23%">
+<col width="76%">
+</colgroup>
+<thead><tr class="header">
+<th>Function</th>
+<th>Description</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>CodingVariants()</td>
+<td>Falls within a coding region</td>
+</tr>
+<tr class="even">
+<td>IntronVariants()</td>
+<td>Falls within an intron region</td>
+</tr>
+<tr class="odd">
+<td>FiveUTRVariants()</td>
+<td>Falls within a 5’ untranslated region</td>
+</tr>
+<tr class="even">
+<td>ThreeUTRVariants()</td>
+<td>Falls within a 3’ untranslated region</td>
+</tr>
+<tr class="odd">
+<td>IntergenicVariants()</td>
+<td>Does not fall within a transcript associated with a gene</td>
+</tr>
+<tr class="even">
+<td>SpliceSiteVariants()</td>
+<td>Overlaps any portion of the first 2 or last 2 nucleotide of an intron</td>
+</tr>
+<tr class="odd">
+<td>PromoterVariants()</td>
+<td>Falls within a promoter region of a transcript</td>
+</tr>
+<tr class="even">
+<td>AllVariants()</td>
+<td>All regions</td>
+</tr>
+</tbody>
+</table>
+</li>
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">loc_splice</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/VariantAnnotation/man/locateVariants-methods.html">locateVariants</a></span><span class="op">(</span><span class="va">rd</span>, <span class="va">txdb</span>, <span class="fu"><a href="https://rdrr.io/pkg/VariantAnnotation/man/VariantType-class.html">SpliceSiteVariants</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">loc_splice</span>, <span class="fl">3</span><span class="op">)</span>
+<span class="co">#&gt; GRanges object with 3 ranges and 9 metadata columns:</span>
+<span class="co">#&gt;                seqnames    ranges strand |   LOCATION  LOCSTART    LOCEND</span>
+<span class="co">#&gt;                   &lt;Rle&gt; &lt;IRanges&gt;  &lt;Rle&gt; |   &lt;factor&gt; &lt;integer&gt; &lt;integer&gt;</span>
+<span class="co">#&gt;   1:787492_T/C     chr1    787492      + | spliceSite      &lt;NA&gt;      &lt;NA&gt;</span>
+<span class="co">#&gt;   1:787492_T/C     chr1    787492      + | spliceSite      &lt;NA&gt;      &lt;NA&gt;</span>
+<span class="co">#&gt;   1:787492_T/C     chr1    787492      + | spliceSite      &lt;NA&gt;      &lt;NA&gt;</span>
+<span class="co">#&gt;                  QUERYID      TXID         CDSID      GENEID       PRECEDEID</span>
+<span class="co">#&gt;                &lt;integer&gt; &lt;integer&gt; &lt;IntegerList&gt; &lt;character&gt; &lt;CharacterList&gt;</span>
+<span class="co">#&gt;   1:787492_T/C        12        15                    643837                </span>
+<span class="co">#&gt;   1:787492_T/C        12        16                    643837                </span>
+<span class="co">#&gt;   1:787492_T/C        12        18                    643837                </span>
+<span class="co">#&gt;                       FOLLOWID</span>
+<span class="co">#&gt;                &lt;CharacterList&gt;</span>
+<span class="co">#&gt;   1:787492_T/C                </span>
+<span class="co">#&gt;   1:787492_T/C                </span>
+<span class="co">#&gt;   1:787492_T/C                </span>
+<span class="co">#&gt;   -------</span>
+<span class="co">#&gt;   seqinfo: 25 sequences from an unspecified genome; no seqlengths</span>
+<span class="fu">seqnames</span><span class="op">(</span><span class="va">loc_splice</span><span class="op">)</span>
+<span class="co">#&gt; factor-Rle of length 38 with 7 runs</span>
+<span class="co">#&gt;   Lengths:     6     7    13     1     4     1     6</span>
+<span class="co">#&gt;   Values : chr1  chr2  chr3  chr4  chr9  chr11 chr16</span>
+<span class="co">#&gt; Levels(25): chr1 chr2 chr3 chr4 chr5 chr6 ... chr20 chr21 chr22 chrX chrY chrM</span></code></pre></div>
+</ul></details>
+</div>
+<div id="amino-acid-coding-changes" class="section level4">
+<h4 class="hasAnchor">
+<a href="#amino-acid-coding-changes" class="anchor"></a><em>Amino acid coding changes</em>
+</h4>
+<p><code>predictCoding</code> computes amino acid coding changes for non-synonymous mutations.</p>
+<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">coding</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/VariantAnnotation/man/predictCoding-methods.html">predictCoding</a></span><span class="op">(</span><span class="va">vcf</span>, <span class="va">txdb</span>, seqSource <span class="op">=</span> <span class="va">Hsapiens</span><span class="op">)</span>
+<span class="va">coding</span><span class="op">[</span><span class="fl">3</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>
+<span class="co">#&gt; GRanges object with 2 ranges and 17 metadata columns:</span>
+<span class="co">#&gt;                 seqnames    ranges strand | paramRangeID            REF</span>
+<span class="co">#&gt;                    &lt;Rle&gt; &lt;IRanges&gt;  &lt;Rle&gt; |     &lt;factor&gt; &lt;DNAStringSet&gt;</span>
+<span class="co">#&gt;    1:883516_G/A     chr1    883516      - |           NA              G</span>
+<span class="co">#&gt;   1:3329312_C/T     chr1   3329312      + |           NA              C</span>
+<span class="co">#&gt;                                ALT      QUAL      FILTER      varAllele</span>
+<span class="co">#&gt;                 &lt;DNAStringSetList&gt; &lt;numeric&gt; &lt;character&gt; &lt;DNAStringSet&gt;</span>
+<span class="co">#&gt;    1:883516_G/A                  A        NA        PASS              T</span>
+<span class="co">#&gt;   1:3329312_C/T                  T        NA        PASS              T</span>
+<span class="co">#&gt;                    CDSLOC    PROTEINLOC   QUERYID        TXID         CDSID</span>
+<span class="co">#&gt;                 &lt;IRanges&gt; &lt;IntegerList&gt; &lt;integer&gt; &lt;character&gt; &lt;IntegerList&gt;</span>
+<span class="co">#&gt;    1:883516_G/A      1654           552        18        4116         12095</span>
+<span class="co">#&gt;   1:3329312_C/T      2551           851        79         154           395</span>
+<span class="co">#&gt;                      GENEID   CONSEQUENCE       REFCODON       VARCODON</span>
+<span class="co">#&gt;                 &lt;character&gt;      &lt;factor&gt; &lt;DNAStringSet&gt; &lt;DNAStringSet&gt;</span>
+<span class="co">#&gt;    1:883516_G/A       26155 synonymous               CTG            TTG</span>
+<span class="co">#&gt;   1:3329312_C/T       63976 nonsynonymous            CCC            TCC</span>
+<span class="co">#&gt;                         REFAA         VARAA</span>
+<span class="co">#&gt;                 &lt;AAStringSet&gt; &lt;AAStringSet&gt;</span>
+<span class="co">#&gt;    1:883516_G/A             L             L</span>
+<span class="co">#&gt;   1:3329312_C/T             P             S</span>
+<span class="co">#&gt;   -------</span>
+<span class="co">#&gt;   seqinfo: 25 sequences from an unspecified genome</span></code></pre></div>
+<p>Here shows all consequences of coding variants.</p>
+<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/unique.html">unique</a></span><span class="op">(</span><span class="va">coding</span><span class="op">$</span><span class="va">CONSEQUENCE</span><span class="op">)</span>
+<span class="co">#&gt; [1] synonymous    nonsynonymous nonsense      frameshift   </span>
+<span class="co">#&gt; Levels: frameshift nonsense nonsynonymous synonymous</span></code></pre></div>
+<p>The coding result can be filtered by different syntaxes and functions. <strong>Why are there variants without genes? And duplicates?</strong></p>
+<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">coding</span><span class="op">[</span><span class="va">coding</span><span class="op">$</span><span class="va">CONSEQUENCE</span> <span class="op">==</span> <span class="st">"frameshift"</span><span class="op">]</span>, <span class="fl">3</span><span class="op">)</span>
+<span class="co">#&gt; GRanges object with 3 ranges and 17 metadata columns:</span>
+<span class="co">#&gt;                    seqnames              ranges strand | paramRangeID</span>
+<span class="co">#&gt;                       &lt;Rle&gt;           &lt;IRanges&gt;  &lt;Rle&gt; |     &lt;factor&gt;</span>
+<span class="co">#&gt;   2:102626146_CG/C     chr2 102626146-102626147      + |           NA</span>
+<span class="co">#&gt;   2:102626146_CG/C     chr2 102626146-102626147      + |           NA</span>
+<span class="co">#&gt;   2:102626146_CG/C     chr2 102626146-102626147      + |           NA</span>
+<span class="co">#&gt;                               REF                ALT      QUAL      FILTER</span>
+<span class="co">#&gt;                    &lt;DNAStringSet&gt; &lt;DNAStringSetList&gt; &lt;numeric&gt; &lt;character&gt;</span>
+<span class="co">#&gt;   2:102626146_CG/C             CG                  C        NA        PASS</span>
+<span class="co">#&gt;   2:102626146_CG/C             CG                  C        NA        PASS</span>
+<span class="co">#&gt;   2:102626146_CG/C             CG                  C        NA        PASS</span>
+<span class="co">#&gt;                         varAllele    CDSLOC    PROTEINLOC   QUERYID        TXID</span>
+<span class="co">#&gt;                    &lt;DNAStringSet&gt; &lt;IRanges&gt; &lt;IntegerList&gt; &lt;integer&gt; &lt;character&gt;</span>
+<span class="co">#&gt;   2:102626146_CG/C              C   190-191            64      5305        8977</span>
+<span class="co">#&gt;   2:102626146_CG/C              C   190-191            64      5305        8978</span>
+<span class="co">#&gt;   2:102626146_CG/C              C   190-191            64      5305        8979</span>
+<span class="co">#&gt;                            CDSID      GENEID CONSEQUENCE       REFCODON</span>
+<span class="co">#&gt;                    &lt;IntegerList&gt; &lt;character&gt;    &lt;factor&gt; &lt;DNAStringSet&gt;</span>
+<span class="co">#&gt;   2:102626146_CG/C         26915        7850  frameshift            CGC</span>
+<span class="co">#&gt;   2:102626146_CG/C         26915        7850  frameshift            CGC</span>
+<span class="co">#&gt;   2:102626146_CG/C         26915        7850  frameshift            CGC</span>
+<span class="co">#&gt;                          VARCODON         REFAA         VARAA</span>
+<span class="co">#&gt;                    &lt;DNAStringSet&gt; &lt;AAStringSet&gt; &lt;AAStringSet&gt;</span>
+<span class="co">#&gt;   2:102626146_CG/C             CC                            </span>
+<span class="co">#&gt;   2:102626146_CG/C             CC                            </span>
+<span class="co">#&gt;   2:102626146_CG/C             CC                            </span>
+<span class="co">#&gt;   -------</span>
+<span class="co">#&gt;   seqinfo: 25 sequences from an unspecified genome</span>
+<span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">coding</span><span class="op">[</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span><span class="op">(</span><span class="va">coding</span><span class="op">$</span><span class="va">GENEID</span><span class="op">)</span><span class="op">]</span>, <span class="fl">3</span><span class="op">)</span>
+<span class="co">#&gt; GRanges object with 3 ranges and 17 metadata columns:</span>
+<span class="co">#&gt;                seqnames    ranges strand | paramRangeID            REF</span>
+<span class="co">#&gt;                   &lt;Rle&gt; &lt;IRanges&gt;  &lt;Rle&gt; |     &lt;factor&gt; &lt;DNAStringSet&gt;</span>
+<span class="co">#&gt;   1:883516_G/A     chr1    883516      - |           NA              G</span>
+<span class="co">#&gt;   1:883516_G/A     chr1    883516      - |           NA              G</span>
+<span class="co">#&gt;   1:883516_G/A     chr1    883516      - |           NA              G</span>
+<span class="co">#&gt;                               ALT      QUAL      FILTER      varAllele</span>
+<span class="co">#&gt;                &lt;DNAStringSetList&gt; &lt;numeric&gt; &lt;character&gt; &lt;DNAStringSet&gt;</span>
+<span class="co">#&gt;   1:883516_G/A                  A        NA        PASS              T</span>
+<span class="co">#&gt;   1:883516_G/A                  A        NA        PASS              T</span>
+<span class="co">#&gt;   1:883516_G/A                  A        NA        PASS              T</span>
+<span class="co">#&gt;                   CDSLOC    PROTEINLOC   QUERYID        TXID         CDSID</span>
+<span class="co">#&gt;                &lt;IRanges&gt; &lt;IntegerList&gt; &lt;integer&gt; &lt;character&gt; &lt;IntegerList&gt;</span>
+<span class="co">#&gt;   1:883516_G/A      1045           349        18        4114         12095</span>
+<span class="co">#&gt;   1:883516_G/A      1654           552        18        4115         12095</span>
+<span class="co">#&gt;   1:883516_G/A      1654           552        18        4116         12095</span>
+<span class="co">#&gt;                     GENEID CONSEQUENCE       REFCODON       VARCODON</span>
+<span class="co">#&gt;                &lt;character&gt;    &lt;factor&gt; &lt;DNAStringSet&gt; &lt;DNAStringSet&gt;</span>
+<span class="co">#&gt;   1:883516_G/A       26155  synonymous            CTG            TTG</span>
+<span class="co">#&gt;   1:883516_G/A       26155  synonymous            CTG            TTG</span>
+<span class="co">#&gt;   1:883516_G/A       26155  synonymous            CTG            TTG</span>
+<span class="co">#&gt;                        REFAA         VARAA</span>
+<span class="co">#&gt;                &lt;AAStringSet&gt; &lt;AAStringSet&gt;</span>
+<span class="co">#&gt;   1:883516_G/A             L             L</span>
+<span class="co">#&gt;   1:883516_G/A             L             L</span>
+<span class="co">#&gt;   1:883516_G/A             L             L</span>
+<span class="co">#&gt;   -------</span>
+<span class="co">#&gt;   seqinfo: 25 sequences from an unspecified genome</span></code></pre></div>
+<p>Those methods can be used to identify variants on specific genes, for example BRAF (Gene ID: 673).</p>
+<details><summary>
+Solution
+</summary><ul>
+<li>
+You can’t filter on column with NA values.
+</li>
+<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">coding</span><span class="op">[</span><span class="va">coding</span><span class="op">$</span><span class="va">GENEID</span> <span class="op">==</span> <span class="st">"673"</span><span class="op">]</span>
+<span class="co">#&gt; Error: logical subscript contains NAs</span></code></pre></div>
+<li>
+Instead, you should filter out the NA values first.
+</li>
+<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">gene_coding</span> <span class="op">&lt;-</span> <span class="va">coding</span><span class="op">[</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span><span class="op">(</span><span class="va">coding</span><span class="op">$</span><span class="va">GENEID</span><span class="op">)</span><span class="op">]</span>
+<span class="va">gene_coding</span><span class="op">[</span><span class="va">gene_coding</span><span class="op">$</span><span class="va">GENEID</span> <span class="op">==</span> <span class="st">"673"</span><span class="op">]</span>
+<span class="co">#&gt; GRanges object with 1 range and 17 metadata columns:</span>
+<span class="co">#&gt;                   seqnames    ranges strand | paramRangeID            REF</span>
+<span class="co">#&gt;                      &lt;Rle&gt; &lt;IRanges&gt;  &lt;Rle&gt; |     &lt;factor&gt; &lt;DNAStringSet&gt;</span>
+<span class="co">#&gt;   7:140453136_A/T     chr7 140453136      - |           NA              A</span>
+<span class="co">#&gt;                                  ALT      QUAL      FILTER      varAllele</span>
+<span class="co">#&gt;                   &lt;DNAStringSetList&gt; &lt;numeric&gt; &lt;character&gt; &lt;DNAStringSet&gt;</span>
+<span class="co">#&gt;   7:140453136_A/T                  T        NA        PASS              A</span>
+<span class="co">#&gt;                      CDSLOC    PROTEINLOC   QUERYID        TXID         CDSID</span>
+<span class="co">#&gt;                   &lt;IRanges&gt; &lt;IntegerList&gt; &lt;integer&gt; &lt;character&gt; &lt;IntegerList&gt;</span>
+<span class="co">#&gt;   7:140453136_A/T      1799           600     23429       31502         94302</span>
+<span class="co">#&gt;                        GENEID   CONSEQUENCE       REFCODON       VARCODON</span>
+<span class="co">#&gt;                   &lt;character&gt;      &lt;factor&gt; &lt;DNAStringSet&gt; &lt;DNAStringSet&gt;</span>
+<span class="co">#&gt;   7:140453136_A/T         673 nonsynonymous            GTG            GAG</span>
+<span class="co">#&gt;                           REFAA         VARAA</span>
+<span class="co">#&gt;                   &lt;AAStringSet&gt; &lt;AAStringSet&gt;</span>
+<span class="co">#&gt;   7:140453136_A/T             V             E</span>
+<span class="co">#&gt;   -------</span>
+<span class="co">#&gt;   seqinfo: 25 sequences from an unspecified genome</span></code></pre></div>
+<li>
+You can further investigate this variant on external databases like <a href="https://cancer.sanger.ac.uk/cosmic/mutation/overview?id=170110762">COSMIC</a>.
+</li>
+</ul></details>
+</div>
+<div id="match-variants-within-cosmic" class="section level4">
+<h4 class="hasAnchor">
+<a href="#match-variants-within-cosmic" class="anchor"></a><em>Match variants within COSMIC</em>
+</h4>
+<p><strong>This part is not working as intended, and help needed!</strong></p>
+<p>Read and pre-process COSMIC database.</p>
+<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">cosmic_path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"vcf"</span>, <span class="st">"cosmic_67.vcf.gz"</span>, package <span class="op">=</span> <span class="st">"COSMIC.67"</span><span class="op">)</span>
+<span class="va">cosmic_db</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/VariantAnnotation/man/readVcf-methods.html">readVcf</a></span><span class="op">(</span><span class="va">cosmic_path</span>, genome <span class="op">=</span> <span class="st">"GRCh37"</span><span class="op">)</span>
+<span class="fu">seqlevels</span><span class="op">(</span><span class="va">cosmic_db</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="st">"chr"</span>, <span class="fu">seqlevels</span><span class="op">(</span><span class="va">cosmic_db</span><span class="op">)</span><span class="op">)</span>
+<span class="va">cosmic_db</span> <span class="op">=</span> <span class="fu">renameSeqlevels</span><span class="op">(</span><span class="va">cosmic_db</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span>chrMT<span class="op">=</span><span class="st">"chrM"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<p>The <code><a href="https://rdrr.io/r/base/match.html">match()</a></code> function only matches chromosome and ranges but not <em>ALT</em>.</p>
+<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">variant_loc</span> <span class="op">&lt;-</span> <span class="fu">rowRanges</span><span class="op">(</span><span class="va">vcf</span><span class="op">)</span>
+<span class="va">cosmic_loc</span> <span class="op">&lt;-</span> <span class="fu">rowRanges</span><span class="op">(</span><span class="va">cosmic_db</span><span class="op">)</span>
+<span class="va">overlap</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/match.html">match</a></span><span class="op">(</span><span class="va">cosmic_loc</span>, <span class="va">variant_loc</span><span class="op">)</span>
+<span class="va">cosmic_overlap</span> <span class="op">&lt;-</span> <span class="va">cosmic_loc</span><span class="op">[</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span><span class="op">(</span><span class="va">overlap</span><span class="op">)</span><span class="op">]</span></code></pre></div>
+<p>The bug can be identified from the BRAF V600E example.</p>
+<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">variant_loc</span><span class="op">[</span><span class="fu">ranges</span><span class="op">(</span><span class="va">variant_loc</span><span class="op">)</span> <span class="op">==</span> <span class="st">"140453136"</span><span class="op">]</span>
+<span class="co">#&gt; GRanges object with 1 range and 5 metadata columns:</span>
+<span class="co">#&gt;                   seqnames    ranges strand | paramRangeID            REF</span>
+<span class="co">#&gt;                      &lt;Rle&gt; &lt;IRanges&gt;  &lt;Rle&gt; |     &lt;factor&gt; &lt;DNAStringSet&gt;</span>
+<span class="co">#&gt;   7:140453136_A/T     chr7 140453136      * |           NA              A</span>
+<span class="co">#&gt;                                  ALT      QUAL      FILTER</span>
+<span class="co">#&gt;                   &lt;DNAStringSetList&gt; &lt;numeric&gt; &lt;character&gt;</span>
+<span class="co">#&gt;   7:140453136_A/T                  T        NA        PASS</span>
+<span class="co">#&gt;   -------</span>
+<span class="co">#&gt;   seqinfo: 25 sequences from an unspecified genome</span>
+<span class="va">cosmic_overlap</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/stats/start.html">start</a></span><span class="op">(</span><span class="fu">ranges</span><span class="op">(</span><span class="va">cosmic_overlap</span><span class="op">)</span><span class="op">)</span> <span class="op">==</span> <span class="st">"140453136"</span><span class="op">]</span>
+<span class="co">#&gt; GRanges object with 4 ranges and 5 metadata columns:</span>
+<span class="co">#&gt;             seqnames    ranges strand | paramRangeID            REF</span>
+<span class="co">#&gt;                &lt;Rle&gt; &lt;IRanges&gt;  &lt;Rle&gt; |     &lt;factor&gt; &lt;DNAStringSet&gt;</span>
+<span class="co">#&gt;   COSM18443     chr7 140453136      * |           NA              A</span>
+<span class="co">#&gt;    COSM6137     chr7 140453136      * |           NA              A</span>
+<span class="co">#&gt;     COSM476     chr7 140453136      * |           NA              A</span>
+<span class="co">#&gt;   COSM26504     chr7 140453136      * |           NA              A</span>
+<span class="co">#&gt;                             ALT      QUAL      FILTER</span>
+<span class="co">#&gt;              &lt;DNAStringSetList&gt; &lt;numeric&gt; &lt;character&gt;</span>
+<span class="co">#&gt;   COSM18443                   G        NA           .</span>
+<span class="co">#&gt;    COSM6137                   C        NA           .</span>
+<span class="co">#&gt;     COSM476                   T        NA           .</span>
+<span class="co">#&gt;   COSM26504 ACTGTAGCTAGACCAAAAT        NA           .</span>
+<span class="co">#&gt;   -------</span>
+<span class="co">#&gt;   seqinfo: 25 sequences from GRCh37 genome; no seqlengths</span></code></pre></div>
+<p>biomaRt::select(org.Hs.eg.db, keys=genes(txdb)<span class="math inline">\(gene_id, columns=c("SYMBOL"), keytype="ENTREZID")\)</span>SYMBOL</p>
+<!-- <details> -->
+<!-- <summary>Solution </summary> -->
+<!-- <ul> -->
+<!-- <li>First do this.</li> -->
+<!-- ```{bash, eval = FALSE} -->
+<!-- #bwa index ref.fa -->
+<!-- bwa mem ref.fa read1.fq read2.fq > output.sam -->
+<!-- ``` -->
+<!-- <li>Then do that.</li> -->
+<!-- ```{bash, eval = FALSE} -->
+<!-- samtools view -S -b output.sam -o output.bam #converting SAM to BAM -->
+<!-- samtools sort output.bam output.sorted #sorting the BAM reads -->
+<!-- samtools index output.sorted.bam #indexing the sorted BAM -->
+<!-- ``` -->
+<!-- <li>OR, pipe some of the commands in a one-liner:</li> -->
+<!-- ```{bash, eval = FALSE} -->
+<!-- bwa mem ref.fa read1.fq read2.fq | samtools view -S -b - | samtools sort -o output.sorted.bam - -->
+<!-- samtools index output.sorted.bam -->
+<!-- ``` -->
+<!-- <li>Blah blah.</li> -->
+<!-- <li>You should be able to see the resultant files `file1` and `file2`.</li> -->
+<!-- </ul> -->
+<!-- </details> -->
+</div>
 </div>
 </div>
 <div class="footnotes">
