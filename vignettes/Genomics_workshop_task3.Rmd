@@ -31,16 +31,18 @@ library(BSgenome.Hsapiens.UCSC.hg19)
 We use the `VariantAnnotation` package to read and annotate the SNVs we just found.
 
 ```{r, eval = TRUE}
-file_dir <- "../colo829/full/strelka/COLO829R_COLO829T_strelka_passed.somatic.merged.vcf"
-vcf <- readVcf(file_dir)
+# file_dir <- "../colo829/full/strelka/COLO829R_COLO829T_strelka_passed.somatic.merged.vcf"
+# vcf <- readVcf(file_dir)
+vcf <- readVcfsystem.file("extdata", "COLO829R_COLO829T_strelka_passed.somatic.merged.vcf", package = "IntroductionToGenomicsWorkshop")
 ```
 
 The VCF file is modified to maintain its consistency with other databases.
 
 ```{r, eval = TRUE}
-seqlevels(vcf) <- paste0("chr", seqlevels(vcf))
-vcf = renameSeqlevels(vcf, c(chrMT="chrM"))
-seqlengths(vcf)["chrM"] <- 16571
+# seqlevels(vcf) <- paste0("chr", seqlevels(vcf))
+# vcf = renameSeqlevels(vcf, c(chrMT="chrM"))
+# seqlengths(vcf)["chrM"] <- 16571
+seqlevelsStyle(vcf) <- "UCSC"
 ```
 
 #### *Header information of VCF file*
