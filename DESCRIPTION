@@ -25,8 +25,7 @@ Depends:
 Suggests: 
     knitr,
     rmarkdown,
-    pkgdown,
-    rmdformats
+    pkgdown
 URL: https://PapenfussLab.github.io/IntroductionToGenomicsWorkshop
 BugReports: https://github.com/PapenfussLab/IntroductionToGenomicsWorkshop/issues
 VignetteBuilder: knitr
