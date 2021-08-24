@@ -31,7 +31,7 @@ library(BSgenome.Hsapiens.UCSC.hg19)
 We use the `VariantAnnotation` package to read and annotate the SNVs we just found.
 
 ```{r, eval = TRUE}
-file_dir <- "./colo829/full/strelka/COLO829R_COLO829T_strelka_passed.somatic.merged.vcf"
+file_dir <- "/home/rstudio/colo829/full/strelka/COLO829R_COLO829T_strelka_passed.somatic.merged.vcf"
 vcf <- readVcf(file_dir)
 ```
 
@@ -206,3 +206,5 @@ The bug can be identified from the BRAF V600E example.
 variant_loc[ranges(variant_loc) == "140453136"]
 cosmic_overlap[start(ranges(cosmic_overlap)) == "140453136"]
 ```
+
+biomaRt::select(org.Hs.eg.db, keys=genes(txdb)$gene_id, columns=c("SYMBOL"), keytype="ENTREZID")$SYMBOL
