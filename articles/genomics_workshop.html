@@ -125,9 +125,11 @@
 <li><a href="http://www.htslib.org/doc/samtools.html">samtools</a></li>
 <li><a href="https://github.com/Illumina/strelka">Strelka2</a></li>
 <li><a href="https://bioconductor.org/packages/release/bioc/html/VariantAnnotation.html">VariantAnnotation</a></li>
-<li>
-<a href="https://cancer.sanger.ac.uk/cosmic">COSMIC</a> <strong>To be updated</strong>
-</li>
+<li><a href="https://bioconductor.org/packages/release/data/annotation/html/TxDb.Hsapiens.UCSC.hg19.knownGene.html">TxDb.Hsapiens.UCSC.hg19.knownGene</a></li>
+<li><a href="https://bioconductor.org/packages/release/data/annotation/html/BSgenome.Hsapiens.UCSC.hg19.html">BSgenome.Hsapiens.UCSC.hg19</a></li>
+<li><a href="https://bioconductor.org/packages/release/data/experiment/html/COSMIC.67.html">COSMIC.67</a></li>
+<li><a href="https://bioconductor.org/packages/release/data/annotation/html/org.Hs.eg.db.html">org.Hs.eg.db</a></li>
+<li><a href="https://cancer.sanger.ac.uk/cosmic">COSMIC</a></li>
 </ul>
 </div>
 <div id="time-outline" class="section level3">
@@ -213,7 +215,7 @@
 <ol start="4" style="list-style-type: decimal">
 <li>SNV analysis workflow (<strong>image to be updated</strong>)</li>
 </ol>
-<p><img src="../../../../tmp/RtmpTd8yqI/temp_libpath6f316ac3b94/IntroductionToGenomicsWorkshop/extdata/snvWorkflow.png" width="425"></p>
+<p><img src="../../../../tmp/RtmpTVwANz/temp_libpath353620b06c0/IntroductionToGenomicsWorkshop/extdata/snvWorkflow.png" width="425"></p>
 </div>
 <div id="task-1-read-alignments-sorting-and-indexing" class="section level3">
 <h3 class="hasAnchor">
@@ -300,7 +302,8 @@ Solution
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">VariantAnnotation</span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">TxDb.Hsapiens.UCSC.hg19.knownGene</span><span class="op">)</span>
-<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">BSgenome.Hsapiens.UCSC.hg19</span><span class="op">)</span></code></pre></div>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">BSgenome.Hsapiens.UCSC.hg19</span><span class="op">)</span>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">org.Hs.eg.db</span><span class="op">)</span></code></pre></div>
 </div>
 <div id="read-and-pre-process-vcf-file" class="section level4">
 <h4 class="hasAnchor">
@@ -309,12 +312,9 @@ Solution
 <p>We use the <code>VariantAnnotation</code> package to read and annotate the SNVs we just found.</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">vcf</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/VariantAnnotation/man/readVcf-methods.html">readVcf</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"strelka.somatic.vcf"</span>, package <span class="op">=</span> <span class="st">"IntroductionToGenomicsWorkshop"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
-<p>The VCF file is modified to maintain its consistency with other databases.</p>
+<p>Variant sequence style is changed to maintain its consistency with other databases.</p>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co"># seqlevels(vcf) &lt;- paste0("chr", seqlevels(vcf))</span>
-<span class="co"># vcf = renameSeqlevels(vcf, c(chrMT="chrM"))</span>
-<span class="co"># seqlengths(vcf)["chrM"] &lt;- 16571</span>
-<span class="fu">seqlevelsStyle</span><span class="op">(</span><span class="va">vcf</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="st">"UCSC"</span></code></pre></div>
+<code class="sourceCode R"><span class="fu">seqlevelsStyle</span><span class="op">(</span><span class="va">vcf</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="st">"UCSC"</span></code></pre></div>
 </div>
 <div id="header-information-of-vcf-file" class="section level4">
 <h4 class="hasAnchor">
@@ -344,12 +344,8 @@ These will work.
 </li>
 <div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/VariantAnnotation/man/VCFHeader-class.html">samples</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/VariantAnnotation/man/VCFHeader-class.html">header</a></span><span class="op">(</span><span class="va">vcf</span><span class="op">)</span><span class="op">)</span>
-<span class="co">#&gt; [1] "NORMAL" "TUMOR"</span></code></pre></div>
-<li>
-<strong>Worth mentioning? Explanation?</strong>
-</li>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/VariantAnnotation/man/VCF-class.html">geno</a></span><span class="op">(</span><span class="va">vcf</span><span class="op">)</span>
+<span class="co">#&gt; [1] "NORMAL" "TUMOR"</span>
+<span class="fu"><a href="https://rdrr.io/pkg/VariantAnnotation/man/VCF-class.html">geno</a></span><span class="op">(</span><span class="va">vcf</span><span class="op">)</span>
 <span class="co">#&gt; List of length 15</span>
 <span class="co">#&gt; names(15): AU CU DP DP2 DP50 FDP FDP50 GU SDP SUBDP SUBDP50 TAR TIR TOR TU</span>
 <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/VariantAnnotation/man/VCF-class.html">geno</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/VariantAnnotation/man/VCFHeader-class.html">header</a></span><span class="op">(</span><span class="va">vcf</span><span class="op">)</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span>
@@ -366,7 +362,7 @@ These will work.
 <a href="#variant-genomic-position" class="anchor"></a><em>Variant genomic position</em>
 </h4>
 <p>The chromosomal location for each SNV can be identified by <code>rowRanges()</code>.</p>
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="fu">rowRanges</span><span class="op">(</span><span class="va">vcf</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span>
 <span class="co">#&gt; GRanges object with 3 ranges and 5 metadata columns:</span>
 <span class="co">#&gt;                seqnames    ranges strand | paramRangeID            REF</span>
@@ -382,7 +378,7 @@ These will work.
 <span class="co">#&gt;   -------</span>
 <span class="co">#&gt;   seqinfo: 25 sequences from an unspecified genome</span></code></pre></div>
 <p>Individual fields can be pulled out either with the <code><a href="https://rdrr.io/r/base/Extract.html">$</a></code> sign or named accessors like <code><a href="https://rdrr.io/pkg/VariantAnnotation/man/VCF-class.html">ref()</a></code>, <code><a href="https://rdrr.io/pkg/VariantAnnotation/man/VCF-class.html">alt()</a></code>.</p>
-<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="fu">rowRanges</span><span class="op">(</span><span class="va">vcf</span><span class="op">)</span><span class="op">$</span><span class="va">ALT</span>, <span class="fl">3</span><span class="op">)</span>
 <span class="co">#&gt; DNAStringSetList of length 3</span>
 <span class="co">#&gt; [[1]] C</span>
@@ -399,7 +395,7 @@ These will work.
 <a href="#locate-variants-in-and-around-genes" class="anchor"></a><em>Locate variants in and around genes</em>
 </h4>
 <p>Variant location with respect to genes can be identified with the <code><a href="https://rdrr.io/pkg/VariantAnnotation/man/locateVariants-methods.html">locateVariants()</a></code> function.</p>
-<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># Get variant location information.</span>
 <span class="va">rd</span> <span class="op">&lt;-</span> <span class="fu">rowRanges</span><span class="op">(</span><span class="va">vcf</span><span class="op">)</span>
 <span class="va">txdb</span> <span class="op">&lt;-</span> <span class="va">TxDb.Hsapiens.UCSC.hg19.knownGene</span>
@@ -421,6 +417,31 @@ These will work.
 <span class="co">#&gt;   1:883516_G/A                </span>
 <span class="co">#&gt;   1:883516_G/A                </span>
 <span class="co">#&gt;   1:883516_G/A                </span>
+<span class="co">#&gt;   -------</span>
+<span class="co">#&gt;   seqinfo: 25 sequences from an unspecified genome; no seqlengths</span></code></pre></div>
+<p>Gene ID can be replaced my gene symbols which are more readable, using <code>org.HS.eg.db</code> database.</p>
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">gene_symbol</span> <span class="op">&lt;-</span> <span class="fu">biomaRt</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/biomaRt/man/select.html">select</a></span><span class="op">(</span><span class="va">org.Hs.eg.db</span>, keys<span class="op">=</span><span class="va">loc</span><span class="op">$</span><span class="va">GENEID</span>, columns<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"SYMBOL"</span><span class="op">)</span>, keytype<span class="op">=</span><span class="st">"ENTREZID"</span><span class="op">)</span><span class="op">$</span><span class="va">SYMBOL</span>
+<span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">gene_symbol</span>, <span class="fl">5</span><span class="op">)</span>
+<span class="co">#&gt; [1] "NOC2L"  "NOC2L"  "NOC2L"  "PRDM16" "PRDM16"</span>
+<span class="va">loc</span><span class="op">$</span><span class="va">SYMBOl</span> <span class="op">&lt;-</span> <span class="va">gene_symbol</span>
+<span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">loc</span>, <span class="fl">3</span><span class="op">)</span>
+<span class="co">#&gt; GRanges object with 3 ranges and 10 metadata columns:</span>
+<span class="co">#&gt;                seqnames    ranges strand | LOCATION  LOCSTART    LOCEND</span>
+<span class="co">#&gt;                   &lt;Rle&gt; &lt;IRanges&gt;  &lt;Rle&gt; | &lt;factor&gt; &lt;integer&gt; &lt;integer&gt;</span>
+<span class="co">#&gt;   1:883516_G/A     chr1    883516      - |   coding      1045      1045</span>
+<span class="co">#&gt;   1:883516_G/A     chr1    883516      - |   coding      1654      1654</span>
+<span class="co">#&gt;   1:883516_G/A     chr1    883516      - |   coding      1654      1654</span>
+<span class="co">#&gt;                  QUERYID        TXID         CDSID      GENEID       PRECEDEID</span>
+<span class="co">#&gt;                &lt;integer&gt; &lt;character&gt; &lt;IntegerList&gt; &lt;character&gt; &lt;CharacterList&gt;</span>
+<span class="co">#&gt;   1:883516_G/A        18        4114         12095       26155                </span>
+<span class="co">#&gt;   1:883516_G/A        18        4115         12095       26155                </span>
+<span class="co">#&gt;   1:883516_G/A        18        4116         12095       26155                </span>
+<span class="co">#&gt;                       FOLLOWID      SYMBOl</span>
+<span class="co">#&gt;                &lt;CharacterList&gt; &lt;character&gt;</span>
+<span class="co">#&gt;   1:883516_G/A                       NOC2L</span>
+<span class="co">#&gt;   1:883516_G/A                       NOC2L</span>
+<span class="co">#&gt;   1:883516_G/A                       NOC2L</span>
 <span class="co">#&gt;   -------</span>
 <span class="co">#&gt;   seqinfo: 25 sequences from an unspecified genome; no seqlengths</span></code></pre></div>
 <p>The number of SNVs on each chromosome can be displayed by <code>seqnames()</code>.</p>
@@ -550,7 +571,7 @@ Check the documentation of <code><a href="https://rdrr.io/pkg/VariantAnnotation/
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/unique.html">unique</a></span><span class="op">(</span><span class="va">coding</span><span class="op">$</span><span class="va">CONSEQUENCE</span><span class="op">)</span>
 <span class="co">#&gt; [1] synonymous    nonsynonymous nonsense      frameshift   </span>
 <span class="co">#&gt; Levels: frameshift nonsense nonsynonymous synonymous</span></code></pre></div>
-<p>The coding result can be filtered by different syntaxes and functions. <strong>Why are there variants without genes? And duplicates?</strong></p>
+<p>The coding result can be filtered by different syntaxes and functions.</p>
 <div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">coding</span><span class="op">[</span><span class="va">coding</span><span class="op">$</span><span class="va">CONSEQUENCE</span> <span class="op">==</span> <span class="st">"frameshift"</span><span class="op">]</span>, <span class="fl">3</span><span class="op">)</span>
 <span class="co">#&gt; GRanges object with 3 ranges and 17 metadata columns:</span>
@@ -610,23 +631,28 @@ Check the documentation of <code><a href="https://rdrr.io/pkg/VariantAnnotation/
 <span class="co">#&gt;   1:883516_G/A             L             L</span>
 <span class="co">#&gt;   -------</span>
 <span class="co">#&gt;   seqinfo: 25 sequences from an unspecified genome</span></code></pre></div>
-<p>Those methods can be used to identify variants on specific genes, for example BRAF (Gene ID: 673).</p>
+<p>Those methods can be used to identify variants on specific genes, for example “BRAF”.</p>
 <details><summary>
 Solution
 </summary><ul>
 <li>
-You can’t filter on column with NA values.
+We first map gene IDs to gene names.
 </li>
 <div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">coding</span><span class="op">[</span><span class="va">coding</span><span class="op">$</span><span class="va">GENEID</span> <span class="op">==</span> <span class="st">"673"</span><span class="op">]</span>
+<code class="sourceCode R"><span class="va">coding</span><span class="op">$</span><span class="va">SYMBOL</span> <span class="op">&lt;-</span> <span class="fu">biomaRt</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/biomaRt/man/select.html">select</a></span><span class="op">(</span><span class="va">org.Hs.eg.db</span>, keys<span class="op">=</span><span class="va">coding</span><span class="op">$</span><span class="va">GENEID</span>, columns<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"SYMBOL"</span><span class="op">)</span>, keytype<span class="op">=</span><span class="st">"ENTREZID"</span><span class="op">)</span><span class="op">$</span><span class="va">SYMBOL</span></code></pre></div>
+<li>
+You can’t filter on column with NA values.
+</li>
+<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">coding</span><span class="op">[</span><span class="va">coding</span><span class="op">$</span><span class="va">SYMBOL</span> <span class="op">==</span> <span class="st">"BRAF"</span><span class="op">]</span>
 <span class="co">#&gt; Error: logical subscript contains NAs</span></code></pre></div>
 <li>
 Instead, you should filter out the NA values first.
 </li>
-<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">gene_coding</span> <span class="op">&lt;-</span> <span class="va">coding</span><span class="op">[</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span><span class="op">(</span><span class="va">coding</span><span class="op">$</span><span class="va">GENEID</span><span class="op">)</span><span class="op">]</span>
-<span class="va">gene_coding</span><span class="op">[</span><span class="va">gene_coding</span><span class="op">$</span><span class="va">GENEID</span> <span class="op">==</span> <span class="st">"673"</span><span class="op">]</span>
-<span class="co">#&gt; GRanges object with 1 range and 17 metadata columns:</span>
+<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">gene_coding</span> <span class="op">&lt;-</span> <span class="va">coding</span><span class="op">[</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span><span class="op">(</span><span class="va">coding</span><span class="op">$</span><span class="va">SYMBOL</span><span class="op">)</span><span class="op">]</span>
+<span class="va">gene_coding</span><span class="op">[</span><span class="va">gene_coding</span><span class="op">$</span><span class="va">SYMBOL</span> <span class="op">==</span> <span class="st">"BRAF"</span><span class="op">]</span>
+<span class="co">#&gt; GRanges object with 1 range and 18 metadata columns:</span>
 <span class="co">#&gt;                   seqnames    ranges strand | paramRangeID            REF</span>
 <span class="co">#&gt;                      &lt;Rle&gt; &lt;IRanges&gt;  &lt;Rle&gt; |     &lt;factor&gt; &lt;DNAStringSet&gt;</span>
 <span class="co">#&gt;   7:140453136_A/T     chr7 140453136      - |           NA              A</span>
@@ -639,14 +665,15 @@ Instead, you should filter out the NA values first.
 <span class="co">#&gt;                        GENEID   CONSEQUENCE       REFCODON       VARCODON</span>
 <span class="co">#&gt;                   &lt;character&gt;      &lt;factor&gt; &lt;DNAStringSet&gt; &lt;DNAStringSet&gt;</span>
 <span class="co">#&gt;   7:140453136_A/T         673 nonsynonymous            GTG            GAG</span>
-<span class="co">#&gt;                           REFAA         VARAA</span>
-<span class="co">#&gt;                   &lt;AAStringSet&gt; &lt;AAStringSet&gt;</span>
-<span class="co">#&gt;   7:140453136_A/T             V             E</span>
+<span class="co">#&gt;                           REFAA         VARAA      SYMBOL</span>
+<span class="co">#&gt;                   &lt;AAStringSet&gt; &lt;AAStringSet&gt; &lt;character&gt;</span>
+<span class="co">#&gt;   7:140453136_A/T             V             E        BRAF</span>
 <span class="co">#&gt;   -------</span>
 <span class="co">#&gt;   seqinfo: 25 sequences from an unspecified genome</span></code></pre></div>
 <li>
 You can further investigate this variant on external databases like <a href="https://cancer.sanger.ac.uk/cosmic/mutation/overview?id=170110762">COSMIC</a>.
 </li>
+<p><em>TO BE REMOVED</em></p>
 </ul></details>
 </div>
 <div id="match-variants-within-cosmic" class="section level4">
@@ -655,19 +682,23 @@ You can further investigate this variant on external databases like <a href="htt
 </h4>
 <p><strong>This part is not working as intended, and help needed!</strong></p>
 <p>Read and pre-process COSMIC database.</p>
-<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">cosmic_path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"vcf"</span>, <span class="st">"cosmic_67.vcf.gz"</span>, package <span class="op">=</span> <span class="st">"COSMIC.67"</span><span class="op">)</span>
 <span class="va">cosmic_db</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/VariantAnnotation/man/readVcf-methods.html">readVcf</a></span><span class="op">(</span><span class="va">cosmic_path</span>, genome <span class="op">=</span> <span class="st">"GRCh37"</span><span class="op">)</span>
-<span class="fu">seqlevels</span><span class="op">(</span><span class="va">cosmic_db</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="st">"chr"</span>, <span class="fu">seqlevels</span><span class="op">(</span><span class="va">cosmic_db</span><span class="op">)</span><span class="op">)</span>
-<span class="va">cosmic_db</span> <span class="op">=</span> <span class="fu">renameSeqlevels</span><span class="op">(</span><span class="va">cosmic_db</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span>chrMT<span class="op">=</span><span class="st">"chrM"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<span class="fu">seqlevelsStyle</span><span class="op">(</span><span class="va">cosmic_db</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="st">"UCSC"</span></code></pre></div>
 <p>The <code><a href="https://rdrr.io/r/base/match.html">match()</a></code> function only matches chromosome and ranges but not <em>ALT</em>.</p>
-<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">variant_loc</span> <span class="op">&lt;-</span> <span class="fu">rowRanges</span><span class="op">(</span><span class="va">vcf</span><span class="op">)</span>
 <span class="va">cosmic_loc</span> <span class="op">&lt;-</span> <span class="fu">rowRanges</span><span class="op">(</span><span class="va">cosmic_db</span><span class="op">)</span>
 <span class="va">overlap</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/match.html">match</a></span><span class="op">(</span><span class="va">cosmic_loc</span>, <span class="va">variant_loc</span><span class="op">)</span>
+<span class="co">#&gt; Warning in .Seqinfo.mergexy(x, y): Each of the 2 combined objects has sequence levels not in the other:</span>
+<span class="co">#&gt;   - in 'x': chrMT</span>
+<span class="co">#&gt;   - in 'y': chrM</span>
+<span class="co">#&gt;   Make sure to always combine/compare objects based on the same reference</span>
+<span class="co">#&gt;   genome (use suppressWarnings() to suppress this warning).</span>
 <span class="va">cosmic_overlap</span> <span class="op">&lt;-</span> <span class="va">cosmic_loc</span><span class="op">[</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span><span class="op">(</span><span class="va">overlap</span><span class="op">)</span><span class="op">]</span></code></pre></div>
 <p>The bug can be identified from the BRAF V600E example.</p>
-<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">variant_loc</span><span class="op">[</span><span class="fu">ranges</span><span class="op">(</span><span class="va">variant_loc</span><span class="op">)</span> <span class="op">==</span> <span class="st">"140453136"</span><span class="op">]</span>
 <span class="co">#&gt; GRanges object with 1 range and 5 metadata columns:</span>
 <span class="co">#&gt;                   seqnames    ranges strand | paramRangeID            REF</span>
@@ -693,8 +724,27 @@ You can further investigate this variant on external databases like <a href="htt
 <span class="co">#&gt;     COSM476                   T        NA           .</span>
 <span class="co">#&gt;   COSM26504 ACTGTAGCTAGACCAAAAT        NA           .</span>
 <span class="co">#&gt;   -------</span>
-<span class="co">#&gt;   seqinfo: 25 sequences from GRCh37 genome; no seqlengths</span></code></pre></div>
-<p>biomaRt::select(org.Hs.eg.db, keys=genes(txdb)<span class="math inline">\(gene_id, columns=c("SYMBOL"), keytype="ENTREZID")\)</span>SYMBOL</p>
+<span class="co">#&gt;   seqinfo: 25 sequences from hg19 genome; no seqlengths</span></code></pre></div>
+<p>Assume the previous overlapping code works.</p>
+<div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">overlap_cos_id</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span><span class="op">(</span><span class="va">cosmic_overlap</span><span class="op">)</span>
+<span class="va">overlap_info</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/VariantAnnotation/man/VCF-class.html">info</a></span><span class="op">(</span><span class="va">cosmic_db</span><span class="op">)</span><span class="op">[</span><span class="va">overlap_cos_id</span>,<span class="op">]</span>
+<span class="va">overlap_info</span> <span class="op">&lt;-</span> <span class="va">overlap_info</span><span class="op">[</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span><span class="op">(</span><span class="va">overlap_info</span><span class="op">$</span><span class="va">CNT</span><span class="op">)</span>,<span class="op">]</span>
+<span class="va">overlap_info</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/order.html">order</a></span><span class="op">(</span><span class="va">overlap_info</span><span class="op">$</span><span class="va">CNT</span><span class="op">)</span>,<span class="op">]</span>
+<span class="co">#&gt; DataFrame with 396 rows and 5 columns</span>
+<span class="co">#&gt;                             GENE      STRAND         CDS          AA       CNT</span>
+<span class="co">#&gt;                      &lt;character&gt; &lt;character&gt; &lt;character&gt; &lt;character&gt; &lt;integer&gt;</span>
+<span class="co">#&gt; COSM36618                  NOC2L           -   c.1654C&gt;T     p.L552L         1</span>
+<span class="co">#&gt; COSM36824 ATAD3B_ENST00000378741           +    c.844A&gt;T     p.R282*         1</span>
+<span class="co">#&gt; COSM36806                  FHAD1           +    c.984C&gt;T     p.F328F         1</span>
+<span class="co">#&gt; COSM36635                ATP13A2           - c.1543-7C&gt;T         p.?         1</span>
+<span class="co">#&gt; COSM36789                 HP1BP3           -    c.564C&gt;T     p.I188I         1</span>
+<span class="co">#&gt; ...                          ...         ...         ...         ...       ...</span>
+<span class="co">#&gt; COSM23141                PPP1R3A           -   c.2844G&gt;A     p.T948T         6</span>
+<span class="co">#&gt; COSM25632                  AGFG1           +   c.1018G&gt;A     p.G340R         7</span>
+<span class="co">#&gt; COSM18443                   BRAF           -   c.1799T&gt;C     p.V600A        12</span>
+<span class="co">#&gt; COSM6137                    BRAF           -   c.1799T&gt;G     p.V600G        12</span>
+<span class="co">#&gt; COSM476                     BRAF           -   c.1799T&gt;A     p.V600E     19691</span></code></pre></div>
 <!-- <details> -->
 <!-- <summary>Solution </summary> -->
 <!-- <ul> -->
