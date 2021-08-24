@@ -5,9 +5,10 @@ author:
   - James Fu^[fu.j@wehi.edu.au]
   - Daniel Cameron^[cameron.d@wehi.edu.au]
 output: 
-  rmdformats::downcute:
-    toc_depth: 6
-  # rmarkdown::html_vignette
+  rmarkdown::html_vignette
+  # rmdformats::downcute:
+  #   toc_depth: 6
+
 vignette: >
   %\VignetteIndexEntry{Genomic Workshop}
   %\VignetteEngine{knitr::rmarkdown}
@@ -50,6 +51,7 @@ If you run into any problems, please describe the issue and send via zoom chat. 
 * [bwa](http://bio-bwa.sourceforge.net/bwa.shtml)
 * [samtools](http://www.htslib.org/doc/samtools.html)
 * [Strelka2](https://github.com/Illumina/strelka)
+* [VariantAnnotation](https://bioconductor.org/packages/release/bioc/html/VariantAnnotation.html)
 * [COSMIC](https://cancer.sanger.ac.uk/cosmic)
 **To be updated**
 
@@ -110,7 +112,7 @@ ls | head -3
 
 ```{r, echo=FALSE}
 #knitr::include_graphics("../inst/images/66b9717601f49f075ed3056af6e5c00a.jpeg")
-knitr::include_graphics(system.file("images", "Example-of-a-best-practices-SNV-calling-workflow-for-somatic-exome-and-genome-data.png", package = "IntroductionToGenomicsWorkshop"))
+knitr::include_graphics(system.file("extdata", "Example-of-a-best-practices-SNV-calling-workflow-for-somatic-exome-and-genome-data.png", package = "IntroductionToGenomicsWorkshop"))
 ```
 
 
@@ -230,7 +232,7 @@ Now that we have the sequencing reads in order, we will start calling SNVs.
 We now have both the normal and tumour inputs ready for variant calling.
 In a real pipeline, there are additional quality control, adapter trimming, and duplicate filtering steps but for this workshop, the data has been pre-processed for us so we can skip these steps.
 
-The variant caller we are using is (Strelka2)[https://github.com/Illumina/strelka/blob/v2.9.x/docs/userGuide/quickStart.md].
+The variant caller we are using is [Strelka2](https://github.com/Illumina/strelka/blob/v2.9.x/docs/userGuide/quickStart.md).
 Looking through the quick start guide, we can see that Strelka2 supports both somatic and germline variant calling.
 As we are doing somatic variant calling, we want to configure a somatic Strelka workflow
 
@@ -323,7 +325,7 @@ The chromosomal location for each SNV can be identified by `rowRanges()`.
 head(rowRanges(vcf), 3)
 ```
 
-Individual fields can be pulled out either with the `$` sign or named accessors like `ref(), alt()`.
+Individual fields can be pulled out either with the `$` sign or named accessors like `ref()`, `alt()`.
 
 ```{r, eval = TRUE}
 head(rowRanges(vcf)$ALT, 3)

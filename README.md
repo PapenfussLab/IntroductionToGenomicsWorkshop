@@ -11,8 +11,8 @@ analysis. You will be provided toy short-read sequencing samples, followed by
 read alignments, variant calling and pathogenicity analysis.
 
 ## Accesing the workshop
-- Docker image: [link]()
-- Workshop material: [github link]()
+- Docker image: [link](http://app.orchestra.cancerdatasci.org/)
+- Workshop material: [link](https://papenfusslab.github.io/IntroductionToGenomicsWorkshop/)
 
 ## Overview
 This workshop will guide you through the workflow of a simple genomic SNV analysis.
@@ -37,8 +37,7 @@ If you run into any problems, please describe the issue and send via zoom chat. 
 * [samtools](http://www.htslib.org/doc/samtools.html)
 * [Strelka2](https://github.com/Illumina/strelka)
 * [COSMIC](https://cancer.sanger.ac.uk/cosmic)
-* [VariantAnnotation]()
-**To be updated**
+* [VariantAnnotation](https://bioconductor.org/packages/release/bioc/html/VariantAnnotation.html)
 
 ### Time outline
 
