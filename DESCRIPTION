@@ -20,7 +20,8 @@ Depends:
     TxDb.Hsapiens.UCSC.hg19.knownGene,
     BSgenome.Hsapiens.UCSC.hg19,
     PolyPhen.Hsapiens.dbSNP131,
-    COSMIC.67
+    COSMIC.67,
+    org.Hs.eg.db
 Suggests: 
     knitr,
     rmarkdown,

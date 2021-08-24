@@ -6,6 +6,7 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
 		bcftools \
 		bwa \
 		wget \
+		less \
 	&& rm -rf /var/lib/apt/lists/*
 
 RUN wget https://github.com/Illumina/strelka/releases/download/v2.9.10/strelka-2.9.10.centos6_x86_64.tar.bz2 \
