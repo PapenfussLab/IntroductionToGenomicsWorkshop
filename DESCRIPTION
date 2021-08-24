@@ -19,7 +19,8 @@ Depends:
     VariantAnnotation,
     TxDb.Hsapiens.UCSC.hg19.knownGene,
     BSgenome.Hsapiens.UCSC.hg19,
-    PolyPhen.Hsapiens.dbSNP131
+    PolyPhen.Hsapiens.dbSNP131,
+    COSMIC.67
 Suggests: 
     knitr,
     rmarkdown,
