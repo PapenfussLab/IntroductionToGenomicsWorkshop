@@ -111,7 +111,7 @@ ls | head -3
 4. SNV analysis workflow (**image to be updated**)
 
 ```{r, echo=FALSE}
-knitr::include_graphics("../inst/extdata/Example-of-a-best-practices-SNV-calling-workflow-for-somatic-exome-and-genome-data.png")
+knitr::include_graphics("../inst/data/workflow.png")
 # knitr::include_graphics(system.file("extdata", "Example-of-a-best-practices-SNV-calling-workflow-for-somatic-exome-and-genome-data.png", package = "IntroductionToGenomicsWorkshop"))
 ```
 
@@ -274,7 +274,7 @@ library(BSgenome.Hsapiens.UCSC.hg19)
 We use the `VariantAnnotation` package to read and annotate the SNVs we just found.
 
 ```{r, eval = TRUE}
-file_dir <- "../inst/extdata/COLO829R_COLO829T_strelka_passed.somatic.merged.vcf"
+file_dir <- "../inst/data/COLO829R_COLO829T_strelka_passed.somatic.merged.vcf"
 vcf <- readVcf(file_dir)
 # vcf <- readVcf(system.file("extdata", "COLO829R_COLO829T_strelka_passed.somatic.merged.vcf", package = "IntroductionToGenomicsWorkshop"))
 ```
