@@ -3,3 +3,4 @@ inst/doc
 .Rproj.user
 **/.DS_Store
 .Rhistory
+inst/extdata/snvworkflow.ai
