@@ -4,7 +4,7 @@ Version: 0.9.0
 Authors@R: c(
 	person("Daniel", "Cameron", email="cameron.d@wehi.edu.au", role=c("aut", "cre"), comment=c(ORCID = "0000-0002-0951-7116")),
 	person("Ruining", "Dong", role=c("aut"), comment=c(ORCID = "0000-0003-1433-0484")),
-	person("James", "Fu", role=c("aut"), comment=c(ORCID = "0000-0003-1433-0484")))
+	person("James", "Fu", email="fu.j@wehi.edu.au", role=c("aut"), comment=c(ORCID = "0000-0003-2449-7034")))
 Description: This package serves as a template for using github actions to 
     prepare a Bioconductor Workshop package for use. In particular,
     a pkgdown website and docker image are generated based on workflow 
