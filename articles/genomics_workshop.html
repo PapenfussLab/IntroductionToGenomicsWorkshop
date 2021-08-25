@@ -215,7 +215,7 @@
 <ol start="4" style="list-style-type: decimal">
 <li>SNV analysis workflow (<strong>image to be updated</strong>)</li>
 </ol>
-<p><img src="../../../../tmp/RtmptpKL0e/temp_libpath3695198a02a/IntroductionToGenomicsWorkshop/extdata/snvWorkflow.png" width="425"></p>
+<p><img src="../inst/extdata/snvWorkflow.png" width="425"></p>
 </div>
 <div id="task-1-read-alignments-sorting-and-indexing" class="section level3">
 <h3 class="hasAnchor">
@@ -311,7 +311,8 @@ Solution
 </h4>
 <p>We use the <code>VariantAnnotation</code> package to read and annotate the SNVs we just found.</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">vcf</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/VariantAnnotation/man/readVcf-methods.html">readVcf</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"strelka.somatic.vcf"</span>, package <span class="op">=</span> <span class="st">"IntroductionToGenomicsWorkshop"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span class="co">#vcf &lt;- readVcf(system.file("extdata", "strelka.somatic.vcf", package = #"IntroductionToGenomicsWorkshop"))</span>
+<span class="va">vcf</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/VariantAnnotation/man/readVcf-methods.html">readVcf</a></span><span class="op">(</span><span class="st">"../inst/extdata/strelka.somatic.vcf"</span><span class="op">)</span></code></pre></div>
 <p>Variant sequence style is changed to maintain its consistency with other databases.</p>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">seqlevelsStyle</span><span class="op">(</span><span class="va">vcf</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="st">"UCSC"</span></code></pre></div>
@@ -568,183 +569,82 @@ Check the documentation of <code><a href="https://rdrr.io/pkg/VariantAnnotation/
 <span class="co">#&gt;   seqinfo: 25 sequences from an unspecified genome</span></code></pre></div>
 <p>Here shows all consequences of coding variants.</p>
 <div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/unique.html">unique</a></span><span class="op">(</span><span class="va">coding</span><span class="op">$</span><span class="va">CONSEQUENCE</span><span class="op">)</span>
-<span class="co">#&gt; [1] synonymous    nonsynonymous nonsense      frameshift   </span>
-<span class="co">#&gt; Levels: frameshift nonsense nonsynonymous synonymous</span></code></pre></div>
-<p>The coding result can be filtered by different syntaxes and functions.</p>
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/table.html">table</a></span><span class="op">(</span><span class="va">coding</span><span class="op">$</span><span class="va">CONSEQUENCE</span><span class="op">)</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt;    frameshift      nonsense nonsynonymous    synonymous </span>
+<span class="co">#&gt;            21            46           562           289</span></code></pre></div>
+<p>We can also annotate each of these variants with their corresponding gene by looking up the <code>GENEID</code>.</p>
 <div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">coding</span><span class="op">[</span><span class="va">coding</span><span class="op">$</span><span class="va">CONSEQUENCE</span> <span class="op">==</span> <span class="st">"frameshift"</span><span class="op">]</span>, <span class="fl">3</span><span class="op">)</span>
-<span class="co">#&gt; GRanges object with 3 ranges and 17 metadata columns:</span>
-<span class="co">#&gt;                    seqnames              ranges strand | paramRangeID</span>
-<span class="co">#&gt;                       &lt;Rle&gt;           &lt;IRanges&gt;  &lt;Rle&gt; |     &lt;factor&gt;</span>
-<span class="co">#&gt;   2:102626146_CG/C     chr2 102626146-102626147      + |           NA</span>
-<span class="co">#&gt;   2:102626146_CG/C     chr2 102626146-102626147      + |           NA</span>
-<span class="co">#&gt;   2:102626146_CG/C     chr2 102626146-102626147      + |           NA</span>
-<span class="co">#&gt;                               REF                ALT      QUAL      FILTER</span>
-<span class="co">#&gt;                    &lt;DNAStringSet&gt; &lt;DNAStringSetList&gt; &lt;numeric&gt; &lt;character&gt;</span>
-<span class="co">#&gt;   2:102626146_CG/C             CG                  C        NA        PASS</span>
-<span class="co">#&gt;   2:102626146_CG/C             CG                  C        NA        PASS</span>
-<span class="co">#&gt;   2:102626146_CG/C             CG                  C        NA        PASS</span>
-<span class="co">#&gt;                         varAllele    CDSLOC    PROTEINLOC   QUERYID        TXID</span>
-<span class="co">#&gt;                    &lt;DNAStringSet&gt; &lt;IRanges&gt; &lt;IntegerList&gt; &lt;integer&gt; &lt;character&gt;</span>
-<span class="co">#&gt;   2:102626146_CG/C              C   190-191            64      5305        8977</span>
-<span class="co">#&gt;   2:102626146_CG/C              C   190-191            64      5305        8978</span>
-<span class="co">#&gt;   2:102626146_CG/C              C   190-191            64      5305        8979</span>
-<span class="co">#&gt;                            CDSID      GENEID CONSEQUENCE       REFCODON</span>
-<span class="co">#&gt;                    &lt;IntegerList&gt; &lt;character&gt;    &lt;factor&gt; &lt;DNAStringSet&gt;</span>
-<span class="co">#&gt;   2:102626146_CG/C         26915        7850  frameshift            CGC</span>
-<span class="co">#&gt;   2:102626146_CG/C         26915        7850  frameshift            CGC</span>
-<span class="co">#&gt;   2:102626146_CG/C         26915        7850  frameshift            CGC</span>
-<span class="co">#&gt;                          VARCODON         REFAA         VARAA</span>
-<span class="co">#&gt;                    &lt;DNAStringSet&gt; &lt;AAStringSet&gt; &lt;AAStringSet&gt;</span>
-<span class="co">#&gt;   2:102626146_CG/C             CC                            </span>
-<span class="co">#&gt;   2:102626146_CG/C             CC                            </span>
-<span class="co">#&gt;   2:102626146_CG/C             CC                            </span>
-<span class="co">#&gt;   -------</span>
-<span class="co">#&gt;   seqinfo: 25 sequences from an unspecified genome</span>
-<span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">coding</span><span class="op">[</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span><span class="op">(</span><span class="va">coding</span><span class="op">$</span><span class="va">GENEID</span><span class="op">)</span><span class="op">]</span>, <span class="fl">3</span><span class="op">)</span>
-<span class="co">#&gt; GRanges object with 3 ranges and 17 metadata columns:</span>
-<span class="co">#&gt;                seqnames    ranges strand | paramRangeID            REF</span>
-<span class="co">#&gt;                   &lt;Rle&gt; &lt;IRanges&gt;  &lt;Rle&gt; |     &lt;factor&gt; &lt;DNAStringSet&gt;</span>
-<span class="co">#&gt;   1:883516_G/A     chr1    883516      - |           NA              G</span>
-<span class="co">#&gt;   1:883516_G/A     chr1    883516      - |           NA              G</span>
-<span class="co">#&gt;   1:883516_G/A     chr1    883516      - |           NA              G</span>
-<span class="co">#&gt;                               ALT      QUAL      FILTER      varAllele</span>
-<span class="co">#&gt;                &lt;DNAStringSetList&gt; &lt;numeric&gt; &lt;character&gt; &lt;DNAStringSet&gt;</span>
-<span class="co">#&gt;   1:883516_G/A                  A        NA        PASS              T</span>
-<span class="co">#&gt;   1:883516_G/A                  A        NA        PASS              T</span>
-<span class="co">#&gt;   1:883516_G/A                  A        NA        PASS              T</span>
-<span class="co">#&gt;                   CDSLOC    PROTEINLOC   QUERYID        TXID         CDSID</span>
-<span class="co">#&gt;                &lt;IRanges&gt; &lt;IntegerList&gt; &lt;integer&gt; &lt;character&gt; &lt;IntegerList&gt;</span>
-<span class="co">#&gt;   1:883516_G/A      1045           349        18        4114         12095</span>
-<span class="co">#&gt;   1:883516_G/A      1654           552        18        4115         12095</span>
-<span class="co">#&gt;   1:883516_G/A      1654           552        18        4116         12095</span>
-<span class="co">#&gt;                     GENEID CONSEQUENCE       REFCODON       VARCODON</span>
-<span class="co">#&gt;                &lt;character&gt;    &lt;factor&gt; &lt;DNAStringSet&gt; &lt;DNAStringSet&gt;</span>
-<span class="co">#&gt;   1:883516_G/A       26155  synonymous            CTG            TTG</span>
-<span class="co">#&gt;   1:883516_G/A       26155  synonymous            CTG            TTG</span>
-<span class="co">#&gt;   1:883516_G/A       26155  synonymous            CTG            TTG</span>
-<span class="co">#&gt;                        REFAA         VARAA</span>
-<span class="co">#&gt;                &lt;AAStringSet&gt; &lt;AAStringSet&gt;</span>
-<span class="co">#&gt;   1:883516_G/A             L             L</span>
-<span class="co">#&gt;   1:883516_G/A             L             L</span>
-<span class="co">#&gt;   1:883516_G/A             L             L</span>
+<code class="sourceCode R"><span class="va">coding</span><span class="op">$</span><span class="va">SYMBOL</span> <span class="op">&lt;-</span> <span class="fu">biomaRt</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/biomaRt/man/select.html">select</a></span><span class="op">(</span><span class="va">org.Hs.eg.db</span>, keys<span class="op">=</span><span class="va">coding</span><span class="op">$</span><span class="va">GENEID</span>, columns<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"SYMBOL"</span><span class="op">)</span>, keytype<span class="op">=</span><span class="st">"ENTREZID"</span><span class="op">)</span><span class="op">$</span><span class="va">SYMBOL</span>
+<span class="co">#&gt; 'select()' returned many:1 mapping between keys and columns</span>
+<span class="va">coding</span><span class="op">[</span><span class="fl">3</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>
+<span class="co">#&gt; GRanges object with 2 ranges and 18 metadata columns:</span>
+<span class="co">#&gt;                 seqnames    ranges strand | paramRangeID            REF</span>
+<span class="co">#&gt;                    &lt;Rle&gt; &lt;IRanges&gt;  &lt;Rle&gt; |     &lt;factor&gt; &lt;DNAStringSet&gt;</span>
+<span class="co">#&gt;    1:883516_G/A     chr1    883516      - |           NA              G</span>
+<span class="co">#&gt;   1:3329312_C/T     chr1   3329312      + |           NA              C</span>
+<span class="co">#&gt;                                ALT      QUAL      FILTER      varAllele</span>
+<span class="co">#&gt;                 &lt;DNAStringSetList&gt; &lt;numeric&gt; &lt;character&gt; &lt;DNAStringSet&gt;</span>
+<span class="co">#&gt;    1:883516_G/A                  A        NA        PASS              T</span>
+<span class="co">#&gt;   1:3329312_C/T                  T        NA        PASS              T</span>
+<span class="co">#&gt;                    CDSLOC    PROTEINLOC   QUERYID        TXID         CDSID</span>
+<span class="co">#&gt;                 &lt;IRanges&gt; &lt;IntegerList&gt; &lt;integer&gt; &lt;character&gt; &lt;IntegerList&gt;</span>
+<span class="co">#&gt;    1:883516_G/A      1654           552        18        4116         12095</span>
+<span class="co">#&gt;   1:3329312_C/T      2551           851        79         154           395</span>
+<span class="co">#&gt;                      GENEID   CONSEQUENCE       REFCODON       VARCODON</span>
+<span class="co">#&gt;                 &lt;character&gt;      &lt;factor&gt; &lt;DNAStringSet&gt; &lt;DNAStringSet&gt;</span>
+<span class="co">#&gt;    1:883516_G/A       26155 synonymous               CTG            TTG</span>
+<span class="co">#&gt;   1:3329312_C/T       63976 nonsynonymous            CCC            TCC</span>
+<span class="co">#&gt;                         REFAA         VARAA      SYMBOL</span>
+<span class="co">#&gt;                 &lt;AAStringSet&gt; &lt;AAStringSet&gt; &lt;character&gt;</span>
+<span class="co">#&gt;    1:883516_G/A             L             L       NOC2L</span>
+<span class="co">#&gt;   1:3329312_C/T             P             S      PRDM16</span>
 <span class="co">#&gt;   -------</span>
 <span class="co">#&gt;   seqinfo: 25 sequences from an unspecified genome</span></code></pre></div>
-<p>Those methods can be used to identify variants on specific genes, for example “BRAF”.</p>
-<details><summary>
-Solution
-</summary><ul>
-<li>
-We first map gene IDs to gene names.
-</li>
-<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">coding</span><span class="op">$</span><span class="va">SYMBOL</span> <span class="op">&lt;-</span> <span class="fu">biomaRt</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/biomaRt/man/select.html">select</a></span><span class="op">(</span><span class="va">org.Hs.eg.db</span>, keys<span class="op">=</span><span class="va">coding</span><span class="op">$</span><span class="va">GENEID</span>, columns<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"SYMBOL"</span><span class="op">)</span>, keytype<span class="op">=</span><span class="st">"ENTREZID"</span><span class="op">)</span><span class="op">$</span><span class="va">SYMBOL</span></code></pre></div>
-<li>
-You can’t filter on column with NA values.
-</li>
-<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">coding</span><span class="op">[</span><span class="va">coding</span><span class="op">$</span><span class="va">SYMBOL</span> <span class="op">==</span> <span class="st">"BRAF"</span><span class="op">]</span>
-<span class="co">#&gt; Error: logical subscript contains NAs</span></code></pre></div>
-<li>
-Instead, you should filter out the NA values first.
-</li>
-<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">gene_coding</span> <span class="op">&lt;-</span> <span class="va">coding</span><span class="op">[</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span><span class="op">(</span><span class="va">coding</span><span class="op">$</span><span class="va">SYMBOL</span><span class="op">)</span><span class="op">]</span>
-<span class="va">gene_coding</span><span class="op">[</span><span class="va">gene_coding</span><span class="op">$</span><span class="va">SYMBOL</span> <span class="op">==</span> <span class="st">"BRAF"</span><span class="op">]</span>
-<span class="co">#&gt; GRanges object with 1 range and 18 metadata columns:</span>
-<span class="co">#&gt;                   seqnames    ranges strand | paramRangeID            REF</span>
-<span class="co">#&gt;                      &lt;Rle&gt; &lt;IRanges&gt;  &lt;Rle&gt; |     &lt;factor&gt; &lt;DNAStringSet&gt;</span>
-<span class="co">#&gt;   7:140453136_A/T     chr7 140453136      - |           NA              A</span>
-<span class="co">#&gt;                                  ALT      QUAL      FILTER      varAllele</span>
-<span class="co">#&gt;                   &lt;DNAStringSetList&gt; &lt;numeric&gt; &lt;character&gt; &lt;DNAStringSet&gt;</span>
-<span class="co">#&gt;   7:140453136_A/T                  T        NA        PASS              A</span>
-<span class="co">#&gt;                      CDSLOC    PROTEINLOC   QUERYID        TXID         CDSID</span>
-<span class="co">#&gt;                   &lt;IRanges&gt; &lt;IntegerList&gt; &lt;integer&gt; &lt;character&gt; &lt;IntegerList&gt;</span>
-<span class="co">#&gt;   7:140453136_A/T      1799           600     23429       31502         94302</span>
-<span class="co">#&gt;                        GENEID   CONSEQUENCE       REFCODON       VARCODON</span>
-<span class="co">#&gt;                   &lt;character&gt;      &lt;factor&gt; &lt;DNAStringSet&gt; &lt;DNAStringSet&gt;</span>
-<span class="co">#&gt;   7:140453136_A/T         673 nonsynonymous            GTG            GAG</span>
-<span class="co">#&gt;                           REFAA         VARAA      SYMBOL</span>
-<span class="co">#&gt;                   &lt;AAStringSet&gt; &lt;AAStringSet&gt; &lt;character&gt;</span>
-<span class="co">#&gt;   7:140453136_A/T             V             E        BRAF</span>
-<span class="co">#&gt;   -------</span>
-<span class="co">#&gt;   seqinfo: 25 sequences from an unspecified genome</span></code></pre></div>
-<li>
-You can further investigate this variant on external databases like <a href="https://cancer.sanger.ac.uk/cosmic/mutation/overview?id=170110762">COSMIC</a>.
-</li>
-<p><em>TO BE REMOVED</em></p>
-</ul></details>
 </div>
 <div id="match-variants-within-cosmic" class="section level4">
 <h4 class="hasAnchor">
 <a href="#match-variants-within-cosmic" class="anchor"></a><em>Match variants within COSMIC</em>
 </h4>
-<p><strong>This part is not working as intended, and help needed!</strong></p>
+<p>To work out which variants are likely driver genes, we can check if they have been seen before in <a href="https://cancer.sanger.ac.uk/cosmic/">COSMIC</a></p>
 <p>Read and pre-process COSMIC database.</p>
-<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">cosmic_path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"vcf"</span>, <span class="st">"cosmic_67.vcf.gz"</span>, package <span class="op">=</span> <span class="st">"COSMIC.67"</span><span class="op">)</span>
 <span class="va">cosmic_db</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/VariantAnnotation/man/readVcf-methods.html">readVcf</a></span><span class="op">(</span><span class="va">cosmic_path</span>, genome <span class="op">=</span> <span class="st">"GRCh37"</span><span class="op">)</span>
 <span class="fu">seqlevelsStyle</span><span class="op">(</span><span class="va">cosmic_db</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="st">"UCSC"</span></code></pre></div>
-<p>The <code><a href="https://rdrr.io/r/base/match.html">match()</a></code> function only matches chromosome and ranges but not <em>ALT</em>.</p>
-<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">variant_loc</span> <span class="op">&lt;-</span> <span class="fu">rowRanges</span><span class="op">(</span><span class="va">vcf</span><span class="op">)</span>
-<span class="va">cosmic_loc</span> <span class="op">&lt;-</span> <span class="fu">rowRanges</span><span class="op">(</span><span class="va">cosmic_db</span><span class="op">)</span>
-<span class="va">overlap</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/match.html">match</a></span><span class="op">(</span><span class="va">cosmic_loc</span>, <span class="va">variant_loc</span><span class="op">)</span>
+<p>We can discard the synonymous mutations, and the rest are potential cancer drivers. Then map them back to the VCF data and filter it.</p>
+<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">potential_drivers</span> <span class="op">=</span> <span class="va">coding</span><span class="op">[</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span><span class="op">(</span><span class="va">coding</span><span class="op">$</span><span class="va">CONSEQUENCE</span><span class="op">)</span> <span class="op">&amp;</span> <span class="va">coding</span><span class="op">$</span><span class="va">CONSEQUENCE</span> <span class="op">!=</span> <span class="st">"synonymous"</span><span class="op">]</span>
+<span class="va">potential_drivers</span> <span class="op">=</span> <span class="fu">rowRanges</span><span class="op">(</span><span class="va">vcf</span><span class="op">)</span><span class="op">[</span><span class="fu">overlapsAny</span><span class="op">(</span><span class="fu">rowRanges</span><span class="op">(</span><span class="va">vcf</span><span class="op">)</span>, <span class="va">potential_drivers</span>, ignore.strand<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span><span class="op">]</span></code></pre></div>
+<p>The potential driver variants are matched with the COSMIC database.</p>
+<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="co"># Match by chromosome and location of the variants.</span>
+<span class="va">cosmics_hits</span> <span class="op">=</span> <span class="fu">findOverlaps</span><span class="op">(</span><span class="va">potential_drivers</span>, <span class="fu">rowRanges</span><span class="op">(</span><span class="va">cosmic_db</span><span class="op">)</span>, type<span class="op">=</span><span class="st">"equal"</span><span class="op">)</span>
 <span class="co">#&gt; Warning in .Seqinfo.mergexy(x, y): Each of the 2 combined objects has sequence levels not in the other:</span>
-<span class="co">#&gt;   - in 'x': chrMT</span>
-<span class="co">#&gt;   - in 'y': chrM</span>
+<span class="co">#&gt;   - in 'x': chrM</span>
+<span class="co">#&gt;   - in 'y': chrMT</span>
 <span class="co">#&gt;   Make sure to always combine/compare objects based on the same reference</span>
 <span class="co">#&gt;   genome (use suppressWarnings() to suppress this warning).</span>
-<span class="va">cosmic_overlap</span> <span class="op">&lt;-</span> <span class="va">cosmic_loc</span><span class="op">[</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span><span class="op">(</span><span class="va">overlap</span><span class="op">)</span><span class="op">]</span></code></pre></div>
-<p>The bug can be identified from the BRAF V600E example.</p>
-<div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">variant_loc</span><span class="op">[</span><span class="fu">ranges</span><span class="op">(</span><span class="va">variant_loc</span><span class="op">)</span> <span class="op">==</span> <span class="st">"140453136"</span><span class="op">]</span>
-<span class="co">#&gt; GRanges object with 1 range and 5 metadata columns:</span>
-<span class="co">#&gt;                   seqnames    ranges strand | paramRangeID            REF</span>
-<span class="co">#&gt;                      &lt;Rle&gt; &lt;IRanges&gt;  &lt;Rle&gt; |     &lt;factor&gt; &lt;DNAStringSet&gt;</span>
-<span class="co">#&gt;   7:140453136_A/T     chr7 140453136      * |           NA              A</span>
-<span class="co">#&gt;                                  ALT      QUAL      FILTER</span>
-<span class="co">#&gt;                   &lt;DNAStringSetList&gt; &lt;numeric&gt; &lt;character&gt;</span>
-<span class="co">#&gt;   7:140453136_A/T                  T        NA        PASS</span>
-<span class="co">#&gt;   -------</span>
-<span class="co">#&gt;   seqinfo: 25 sequences from an unspecified genome</span>
-<span class="va">cosmic_overlap</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/stats/start.html">start</a></span><span class="op">(</span><span class="fu">ranges</span><span class="op">(</span><span class="va">cosmic_overlap</span><span class="op">)</span><span class="op">)</span> <span class="op">==</span> <span class="st">"140453136"</span><span class="op">]</span>
-<span class="co">#&gt; GRanges object with 4 ranges and 5 metadata columns:</span>
-<span class="co">#&gt;             seqnames    ranges strand | paramRangeID            REF</span>
-<span class="co">#&gt;                &lt;Rle&gt; &lt;IRanges&gt;  &lt;Rle&gt; |     &lt;factor&gt; &lt;DNAStringSet&gt;</span>
-<span class="co">#&gt;   COSM18443     chr7 140453136      * |           NA              A</span>
-<span class="co">#&gt;    COSM6137     chr7 140453136      * |           NA              A</span>
-<span class="co">#&gt;     COSM476     chr7 140453136      * |           NA              A</span>
-<span class="co">#&gt;   COSM26504     chr7 140453136      * |           NA              A</span>
-<span class="co">#&gt;                             ALT      QUAL      FILTER</span>
-<span class="co">#&gt;              &lt;DNAStringSetList&gt; &lt;numeric&gt; &lt;character&gt;</span>
-<span class="co">#&gt;   COSM18443                   G        NA           .</span>
-<span class="co">#&gt;    COSM6137                   C        NA           .</span>
-<span class="co">#&gt;     COSM476                   T        NA           .</span>
-<span class="co">#&gt;   COSM26504 ACTGTAGCTAGACCAAAAT        NA           .</span>
-<span class="co">#&gt;   -------</span>
-<span class="co">#&gt;   seqinfo: 25 sequences from hg19 genome; no seqlengths</span></code></pre></div>
-<p>Assume the previous overlapping code works.</p>
-<div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">overlap_cos_id</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span><span class="op">(</span><span class="va">cosmic_overlap</span><span class="op">)</span>
-<span class="va">overlap_info</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/VariantAnnotation/man/VCF-class.html">info</a></span><span class="op">(</span><span class="va">cosmic_db</span><span class="op">)</span><span class="op">[</span><span class="va">overlap_cos_id</span>,<span class="op">]</span>
-<span class="va">overlap_info</span> <span class="op">&lt;-</span> <span class="va">overlap_info</span><span class="op">[</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span><span class="op">(</span><span class="va">overlap_info</span><span class="op">$</span><span class="va">CNT</span><span class="op">)</span>,<span class="op">]</span>
-<span class="va">overlap_info</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/order.html">order</a></span><span class="op">(</span><span class="va">overlap_info</span><span class="op">$</span><span class="va">CNT</span><span class="op">)</span>,<span class="op">]</span>
-<span class="co">#&gt; DataFrame with 396 rows and 5 columns</span>
-<span class="co">#&gt;                             GENE      STRAND         CDS          AA       CNT</span>
-<span class="co">#&gt;                      &lt;character&gt; &lt;character&gt; &lt;character&gt; &lt;character&gt; &lt;integer&gt;</span>
-<span class="co">#&gt; COSM36618                  NOC2L           -   c.1654C&gt;T     p.L552L         1</span>
-<span class="co">#&gt; COSM36824 ATAD3B_ENST00000378741           +    c.844A&gt;T     p.R282*         1</span>
-<span class="co">#&gt; COSM36806                  FHAD1           +    c.984C&gt;T     p.F328F         1</span>
-<span class="co">#&gt; COSM36635                ATP13A2           - c.1543-7C&gt;T         p.?         1</span>
-<span class="co">#&gt; COSM36789                 HP1BP3           -    c.564C&gt;T     p.I188I         1</span>
-<span class="co">#&gt; ...                          ...         ...         ...         ...       ...</span>
-<span class="co">#&gt; COSM23141                PPP1R3A           -   c.2844G&gt;A     p.T948T         6</span>
-<span class="co">#&gt; COSM25632                  AGFG1           +   c.1018G&gt;A     p.G340R         7</span>
-<span class="co">#&gt; COSM18443                   BRAF           -   c.1799T&gt;C     p.V600A        12</span>
-<span class="co">#&gt; COSM6137                    BRAF           -   c.1799T&gt;G     p.V600G        12</span>
-<span class="co">#&gt; COSM476                     BRAF           -   c.1799T&gt;A     p.V600E     19691</span></code></pre></div>
+<span class="co"># Match by reference and alternative allele of the variants.</span>
+<span class="va">cosmics_hits</span> <span class="op">=</span> <span class="va">cosmics_hits</span><span class="op">[</span>
+  <span class="fu"><a href="https://rdrr.io/r/base/character.html">as.character</a></span><span class="op">(</span><span class="va">potential_drivers</span><span class="op">$</span><span class="va">REF</span><span class="op">[</span><span class="fu">queryHits</span><span class="op">(</span><span class="va">cosmics_hits</span><span class="op">)</span><span class="op">]</span><span class="op">)</span> <span class="op">==</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html">as.character</a></span><span class="op">(</span><span class="fu">rowRanges</span><span class="op">(</span><span class="va">cosmic_db</span><span class="op">)</span><span class="op">$</span><span class="va">REF</span><span class="op">[</span><span class="fu">subjectHits</span><span class="op">(</span><span class="va">cosmics_hits</span><span class="op">)</span><span class="op">]</span><span class="op">)</span> <span class="op">&amp;</span>
+  <span class="fu"><a href="https://rdrr.io/r/base/character.html">as.character</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unlist.html">unlist</a></span><span class="op">(</span><span class="va">potential_drivers</span><span class="op">$</span><span class="va">ALT</span><span class="op">[</span><span class="fu">queryHits</span><span class="op">(</span><span class="va">cosmics_hits</span><span class="op">)</span><span class="op">]</span><span class="op">)</span><span class="op">)</span> <span class="op">==</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html">as.character</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unlist.html">unlist</a></span><span class="op">(</span><span class="fu">rowRanges</span><span class="op">(</span><span class="va">cosmic_db</span><span class="op">)</span><span class="op">$</span><span class="va">ALT</span><span class="op">[</span><span class="fu">subjectHits</span><span class="op">(</span><span class="va">cosmics_hits</span><span class="op">)</span><span class="op">]</span><span class="op">)</span><span class="op">)</span>
+  <span class="op">]</span></code></pre></div>
+<p>Finally, we take the COSMIC information of the potential driver mutants and rank them by <code>CNT</code>. <code>CNT</code> values denote the sample count for the given variant.</p>
+<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">found_in_cosmic</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/VariantAnnotation/man/VCF-class.html">info</a></span><span class="op">(</span><span class="va">cosmic_db</span><span class="op">)</span><span class="op">[</span><span class="fu">subjectHits</span><span class="op">(</span><span class="va">cosmics_hits</span><span class="op">)</span>,<span class="op">]</span>
+<span class="va">found_in_cosmic</span> <span class="op">=</span> <span class="va">found_in_cosmic</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/order.html">order</a></span><span class="op">(</span><span class="op">-</span><span class="va">found_in_cosmic</span><span class="op">$</span><span class="va">CNT</span><span class="op">)</span>,<span class="op">]</span>
+<span class="va">found_in_cosmic</span> <span class="op">=</span> <span class="va">found_in_cosmic</span><span class="op">[</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span><span class="op">(</span><span class="va">found_in_cosmic</span><span class="op">$</span><span class="va">CNT</span><span class="op">)</span>,<span class="op">]</span>
+<span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">found_in_cosmic</span>, <span class="fl">5</span><span class="op">)</span>
+<span class="co">#&gt; DataFrame with 5 rows and 5 columns</span>
+<span class="co">#&gt;                              GENE      STRAND         CDS          AA       CNT</span>
+<span class="co">#&gt;                       &lt;character&gt; &lt;character&gt; &lt;character&gt; &lt;character&gt; &lt;integer&gt;</span>
+<span class="co">#&gt; COSM476                      BRAF           -   c.1799T&gt;A     p.V600E     19691</span>
+<span class="co">#&gt; COSM25632                   AGFG1           +   c.1018G&gt;A     p.G340R         7</span>
+<span class="co">#&gt; COSM1405984 AGFG1_ENST00000409979           +   c.1090G&gt;A     p.G364R         5</span>
+<span class="co">#&gt; COSM226579  STK19_ENST00000375333           +    c.265G&gt;A      p.D89N         5</span>
+<span class="co">#&gt; COSM23305                   HDAC2           -   c.1225C&gt;T     p.R409*         4</span></code></pre></div>
+<p>Now you can search the mutation identifier <em>(COSM476 for example)</em> in <a href="https://cancer.sanger.ac.uk/cosmic/mutation/overview?id=170110762#">COSMIC</a> and learn more about the variant.</p>
 <!-- <details> -->
 <!-- <summary>Solution </summary> -->
 <!-- <ul> -->
