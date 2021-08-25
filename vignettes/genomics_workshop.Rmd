@@ -111,8 +111,8 @@ ls | head -3
 4. SNV analysis workflow (**image to be updated**)
 
 ```{r, echo=FALSE}
-knitr::include_graphics("../inst/data/workflow.png")
-# knitr::include_graphics(system.file("extdata", "Example-of-a-best-practices-SNV-calling-workflow-for-somatic-exome-and-genome-data.png", package = "IntroductionToGenomicsWorkshop"))
+knitr::include_graphics("../inst/extdata/Example-of-a-best-practices-SNV-calling-workflow-for-somatic-exome-and-genome-data.png")
+# knitr::include_graphics(system.file("extdata", "snvWorkflow.png", package = "IntroductionToGenomicsWorkshop"))
 ```
 
 
