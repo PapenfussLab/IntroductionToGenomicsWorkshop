@@ -114,8 +114,8 @@ ls | head -3
 4. SNV analysis workflow (**image to be updated**)
 
 ```{r, echo=FALSE}
-#knitr::include_graphics("../inst/extdata/snvWorkflow.png")
-knitr::include_graphics(system.file("extdata", "snvWorkflow.png", package = "IntroductionToGenomicsWorkshop"))
+knitr::include_graphics("../inst/extdata/snvWorkflow.png")
+# knitr::include_graphics(system.file("extdata", "snvWorkflow.png", package = "IntroductionToGenomicsWorkshop"))
 ```
 
 
