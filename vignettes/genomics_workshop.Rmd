@@ -25,7 +25,7 @@ knitr::opts_chunk$set(
 
 
 ## Overview
-In this 1-hour workshop, you will have hands-on experience on SNV calling and 
+In this 2-hour workshop, you will have hands-on experience on SNV calling and 
 analysis. You will be provided toy short-read sequencing samples, followed by 
 read alignments, variant calling and pathogenicity analysis.
 
