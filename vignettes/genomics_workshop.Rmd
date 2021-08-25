@@ -398,44 +398,20 @@ coding[3:4]
 Here shows all consequences of coding variants.
 
 ```{r, eval = TRUE}
-unique(coding$CONSEQUENCE)
+table(coding$CONSEQUENCE)
 ```
 
-The coding result can be filtered by different syntaxes and functions. 
+We can discard the synonymous mutations as potential cancer drivers.
+
+We can also annotate each of these variants with their corresponding gene by looking up the `GENEID`.
 
 ```{r, eval = TRUE}
-head(coding[coding$CONSEQUENCE == "frameshift"], 3)
-head(coding[!is.na(coding$GENEID)], 3)
-```
-
-Those methods can be used to identify variants on specific genes, for example "BRAF".
-
-<details>
-<summary>Solution</summary>
-<ul>
-<li>We first map gene IDs to gene names.</li>
-```{r, eval = TRUE, message = FALSE}
 coding$SYMBOL <- biomaRt::select(org.Hs.eg.db, keys=coding$GENEID, columns=c("SYMBOL"), keytype="ENTREZID")$SYMBOL
 ```
-<li>You can't filter on column with NA values.</li>
-```{r, eval = TRUE, error = TRUE}
-coding[coding$SYMBOL == "BRAF"]
-```
-<li>Instead, you should filter out the NA values first.</li>
-```{r, eval = TRUE}
-gene_coding <- coding[!is.na(coding$SYMBOL)]
-gene_coding[gene_coding$SYMBOL == "BRAF"]
-```
-<li>You can further investigate this variant on external databases like [COSMIC](https://cancer.sanger.ac.uk/cosmic/mutation/overview?id=170110762).</li>
-*TO BE REMOVED*
-
-</ul>
-</details>
 
 #### *Match variants within COSMIC*
 
-**This part is not working as intended, and help needed!**
-
+To work out which variants are likely driver genes, we can check if they have been seen before in [COSMIC](https://cancer.sanger.ac.uk/cosmic/)
 Read and pre-process COSMIC database.
 
 ```{r, eval = TRUE}
@@ -447,10 +423,18 @@ seqlevelsStyle(cosmic_db) <- "UCSC"
 The `match()` function only matches chromosome and ranges but not *ALT*.
 
 ```{r, eval = TRUE}
-variant_loc <- rowRanges(vcf)
-cosmic_loc <- rowRanges(cosmic_db)
-overlap <- match(cosmic_loc, variant_loc)
-cosmic_overlap <- cosmic_loc[!is.na(overlap)]
+potential_drivers = coding[!is.na(coding$CONSEQUENCE) & coding$CONSEQUENCE != "synonymous"]
+potential_drivers = rowRanges(vcf)[overlapsAny(rowRanges(vcf), potential_drivers, ignore.strand=TRUE)]
+
+cosmics_hits = findOverlaps(potential_drivers, rowRanges(cosmic_db), type="equal")
+cosmics_hits = cosmics_hits[
+  as.character(potential_drivers$REF[queryHits(cosmics_hits)]) == as.character(rowRanges(cosmic_db)$REF[subjectHits(cosmics_hits)]) &
+  as.character(unlist(potential_drivers$ALT[queryHits(cosmics_hits)])) == as.character(unlist(rowRanges(cosmic_db)$ALT[subjectHits(cosmics_hits)]))
+  ]
+found_in_cosmic = info(cosmic_db)[subjectHits(cosmics_hits),]
+found_in_cosmic = found_in_cosmic[order(-found_in_cosmic$CNT),]
+found_in_cosmic = found_in_cosmic[!is.na(found_in_cosmic$CNT),]
+found_in_cosmic
 ```
 
 The bug can be identified from the BRAF V600E example.
