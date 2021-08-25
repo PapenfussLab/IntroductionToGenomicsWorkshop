@@ -278,7 +278,8 @@ library(org.Hs.eg.db)
 We use the `VariantAnnotation` package to read and annotate the SNVs we just found.
 
 ```{r, eval = TRUE}
-vcf <- readVcf(system.file("extdata", "strelka.somatic.vcf", package = "IntroductionToGenomicsWorkshop"))
+#vcf <- readVcf(system.file("extdata", "strelka.somatic.vcf", package = #"IntroductionToGenomicsWorkshop"))
+vcf <- readVcf("../inst/extdata/strelka.somatic.vcf")
 ```
 
 Variant sequence style is changed to maintain its consistency with other databases.
@@ -401,17 +402,17 @@ Here shows all consequences of coding variants.
 table(coding$CONSEQUENCE)
 ```
 
-We can discard the synonymous mutations as potential cancer drivers.
-
 We can also annotate each of these variants with their corresponding gene by looking up the `GENEID`.
 
 ```{r, eval = TRUE}
 coding$SYMBOL <- biomaRt::select(org.Hs.eg.db, keys=coding$GENEID, columns=c("SYMBOL"), keytype="ENTREZID")$SYMBOL
+coding[3:4]
 ```
 
 #### *Match variants within COSMIC*
 
 To work out which variants are likely driver genes, we can check if they have been seen before in [COSMIC](https://cancer.sanger.ac.uk/cosmic/)
+
 Read and pre-process COSMIC database.
 
 ```{r, eval = TRUE}
@@ -420,39 +421,37 @@ cosmic_db <- readVcf(cosmic_path, genome = "GRCh37")
 seqlevelsStyle(cosmic_db) <- "UCSC"
 ```
 
-The `match()` function only matches chromosome and ranges but not *ALT*.
+We can discard the synonymous mutations, and the rest are potential cancer drivers.
+Then map them back to the VCF data and filter it.
 
 ```{r, eval = TRUE}
 potential_drivers = coding[!is.na(coding$CONSEQUENCE) & coding$CONSEQUENCE != "synonymous"]
 potential_drivers = rowRanges(vcf)[overlapsAny(rowRanges(vcf), potential_drivers, ignore.strand=TRUE)]
+```
 
+The potential driver variants are matched with the COSMIC database.
+
+```{r, eval = TRUE}
+# Match by chromosome and location of the variants.
 cosmics_hits = findOverlaps(potential_drivers, rowRanges(cosmic_db), type="equal")
+# Match by reference and alternative allele of the variants.
 cosmics_hits = cosmics_hits[
   as.character(potential_drivers$REF[queryHits(cosmics_hits)]) == as.character(rowRanges(cosmic_db)$REF[subjectHits(cosmics_hits)]) &
   as.character(unlist(potential_drivers$ALT[queryHits(cosmics_hits)])) == as.character(unlist(rowRanges(cosmic_db)$ALT[subjectHits(cosmics_hits)]))
   ]
+```
+
+Finally, we take the COSMIC information of the potential driver mutants and rank them by `CNT`.
+`CNT` values denote the sample count for the given variant.
+
+```{r, eval = TRUE}
 found_in_cosmic = info(cosmic_db)[subjectHits(cosmics_hits),]
 found_in_cosmic = found_in_cosmic[order(-found_in_cosmic$CNT),]
 found_in_cosmic = found_in_cosmic[!is.na(found_in_cosmic$CNT),]
-found_in_cosmic
+head(found_in_cosmic, 5)
 ```
 
-The bug can be identified from the BRAF V600E example.
-
-```{r, eval = TRUE}
-variant_loc[ranges(variant_loc) == "140453136"]
-cosmic_overlap[start(ranges(cosmic_overlap)) == "140453136"]
-```
-
-Assume the previous overlapping code works.
-
-```{r, eval = TRUE}
-overlap_cos_id <- names(cosmic_overlap)
-overlap_info <- info(cosmic_db)[overlap_cos_id,]
-overlap_info <- overlap_info[!is.na(overlap_info$CNT),]
-overlap_info[order(overlap_info$CNT),]
-```
-
+Now you can search the mutation identifier *(COSM476 for example)* in [COSMIC](https://cancer.sanger.ac.uk/cosmic/mutation/overview?id=170110762#) and learn more about the variant.
 
 <!-- <details> -->
 <!-- <summary>Solution </summary> -->
