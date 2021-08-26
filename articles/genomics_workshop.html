@@ -601,6 +601,34 @@ Check the documentation of <code><a href="https://rdrr.io/pkg/VariantAnnotation/
 <span class="co">#&gt;   1:3329312_C/T             P             S      PRDM16</span>
 <span class="co">#&gt;   -------</span>
 <span class="co">#&gt;   seqinfo: 25 sequences from an unspecified genome</span></code></pre></div>
+<p>We can discard the synonymous mutations, and the rest are potential cancer drivers. Then map them back to the VCF data and filter it.</p>
+<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">potential_drivers</span> <span class="op">=</span> <span class="va">coding</span><span class="op">[</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span><span class="op">(</span><span class="va">coding</span><span class="op">$</span><span class="va">CONSEQUENCE</span><span class="op">)</span> <span class="op">&amp;</span> <span class="va">coding</span><span class="op">$</span><span class="va">CONSEQUENCE</span> <span class="op">!=</span> <span class="st">"synonymous"</span><span class="op">]</span>
+<span class="va">potential_drivers</span> <span class="op">=</span> <span class="fu">rowRanges</span><span class="op">(</span><span class="va">vcf</span><span class="op">)</span><span class="op">[</span><span class="fu">overlapsAny</span><span class="op">(</span><span class="fu">rowRanges</span><span class="op">(</span><span class="va">vcf</span><span class="op">)</span>, <span class="va">potential_drivers</span>, ignore.strand<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span><span class="op">]</span></code></pre></div>
+</div>
+<div id="predict-impact" class="section level4">
+<h4 class="hasAnchor">
+<a href="#predict-impact" class="anchor"></a><em>Predict impact</em>
+</h4>
+<p>For the nonsynonymous mutations, we’d like to know how much these impact the protein. For this, we will use to pre-calculated scores from the rfPred package. To work out how to use the package, we look up the help.</p>
+<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">`?rfPred-package`</span></code></pre></div>
+<p>If you click on the index link, it will show you all functions available in the package. Check what the scoring function requires we see the <code>variant_list</code> parameter requires a <code>data.frame</code> with specific columns. We’ll need to create that before calling the function.</p>
+<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">rfPred</span><span class="op">)</span>
+<span class="va">rfpred_gr</span> <span class="op">=</span> <span class="va">potential_drivers</span>
+<span class="fu">seqlevelsStyle</span><span class="op">(</span><span class="va">rfpred_gr</span><span class="op">)</span> <span class="op">=</span> <span class="st">"NCBI"</span>
+<span class="va">rfpred_df</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span>
+  seqnames<span class="op">=</span><span class="fu">seqnames</span><span class="op">(</span><span class="va">rfpred_gr</span><span class="op">)</span>,
+  start<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/stats/start.html">start</a></span><span class="op">(</span><span class="va">rfpred_gr</span><span class="op">)</span>,
+  reference<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/character.html">as.character</a></span><span class="op">(</span><span class="va">rfpred_gr</span><span class="op">$</span><span class="va">REF</span><span class="op">)</span>,
+  alteration <span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/character.html">as.character</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unlist.html">unlist</a></span><span class="op">(</span><span class="va">rfpred_gr</span><span class="op">$</span><span class="va">ALT</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>
+<span class="va">scores</span> <span class="op">=</span> <span class="fu">rfPred</span><span class="fu">::</span><span class="fu">rfPred_scores</span><span class="op">(</span>
+  variant_list<span class="op">=</span><span class="va">rfpred_df</span>, 
+  data<span class="op">=</span><span class="st">"/home/rstudio/rfPred/all_chr_rfPred.txtz"</span>,
+  index<span class="op">=</span><span class="st">"/home/rstudio/rfPred/all_chr_rfPred.txtz.tbi"</span><span class="op">)</span>
+<span class="va">scores</span> <span class="op">=</span> <span class="va">scores</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/order.html">order</a></span><span class="op">(</span><span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/numeric.html">as.numeric</a></span><span class="op">(</span><span class="va">scores</span><span class="op">$</span><span class="va">rfPred_score</span><span class="op">)</span><span class="op">)</span>,<span class="op">]</span>
+<span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">scores</span>, <span class="fl">20</span><span class="op">)</span></code></pre></div>
 </div>
 <div id="match-variants-within-cosmic" class="section level4">
 <h4 class="hasAnchor">
@@ -608,16 +636,12 @@ Check the documentation of <code><a href="https://rdrr.io/pkg/VariantAnnotation/
 </h4>
 <p>To work out which variants are likely driver genes, we can check if they have been seen before in <a href="https://cancer.sanger.ac.uk/cosmic/">COSMIC</a></p>
 <p>Read and pre-process COSMIC database.</p>
-<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">cosmic_path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"vcf"</span>, <span class="st">"cosmic_67.vcf.gz"</span>, package <span class="op">=</span> <span class="st">"COSMIC.67"</span><span class="op">)</span>
 <span class="va">cosmic_db</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/VariantAnnotation/man/readVcf-methods.html">readVcf</a></span><span class="op">(</span><span class="va">cosmic_path</span>, genome <span class="op">=</span> <span class="st">"GRCh37"</span><span class="op">)</span>
 <span class="fu">seqlevelsStyle</span><span class="op">(</span><span class="va">cosmic_db</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="st">"UCSC"</span></code></pre></div>
-<p>We can discard the synonymous mutations, and the rest are potential cancer drivers. Then map them back to the VCF data and filter it.</p>
-<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">potential_drivers</span> <span class="op">=</span> <span class="va">coding</span><span class="op">[</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span><span class="op">(</span><span class="va">coding</span><span class="op">$</span><span class="va">CONSEQUENCE</span><span class="op">)</span> <span class="op">&amp;</span> <span class="va">coding</span><span class="op">$</span><span class="va">CONSEQUENCE</span> <span class="op">!=</span> <span class="st">"synonymous"</span><span class="op">]</span>
-<span class="va">potential_drivers</span> <span class="op">=</span> <span class="fu">rowRanges</span><span class="op">(</span><span class="va">vcf</span><span class="op">)</span><span class="op">[</span><span class="fu">overlapsAny</span><span class="op">(</span><span class="fu">rowRanges</span><span class="op">(</span><span class="va">vcf</span><span class="op">)</span>, <span class="va">potential_drivers</span>, ignore.strand<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span><span class="op">]</span></code></pre></div>
 <p>The potential driver variants are matched with the COSMIC database.</p>
-<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># Match by chromosome and location of the variants.</span>
 <span class="va">cosmics_hits</span> <span class="op">=</span> <span class="fu">findOverlaps</span><span class="op">(</span><span class="va">potential_drivers</span>, <span class="fu">rowRanges</span><span class="op">(</span><span class="va">cosmic_db</span><span class="op">)</span>, type<span class="op">=</span><span class="st">"equal"</span><span class="op">)</span>
 <span class="co">#&gt; Warning in .Seqinfo.mergexy(x, y): Each of the 2 combined objects has sequence levels not in the other:</span>
@@ -631,7 +655,7 @@ Check the documentation of <code><a href="https://rdrr.io/pkg/VariantAnnotation/
   <span class="fu"><a href="https://rdrr.io/r/base/character.html">as.character</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unlist.html">unlist</a></span><span class="op">(</span><span class="va">potential_drivers</span><span class="op">$</span><span class="va">ALT</span><span class="op">[</span><span class="fu">queryHits</span><span class="op">(</span><span class="va">cosmics_hits</span><span class="op">)</span><span class="op">]</span><span class="op">)</span><span class="op">)</span> <span class="op">==</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html">as.character</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unlist.html">unlist</a></span><span class="op">(</span><span class="fu">rowRanges</span><span class="op">(</span><span class="va">cosmic_db</span><span class="op">)</span><span class="op">$</span><span class="va">ALT</span><span class="op">[</span><span class="fu">subjectHits</span><span class="op">(</span><span class="va">cosmics_hits</span><span class="op">)</span><span class="op">]</span><span class="op">)</span><span class="op">)</span>
   <span class="op">]</span></code></pre></div>
 <p>Finally, we take the COSMIC information of the potential driver mutants and rank them by <code>CNT</code>. <code>CNT</code> values denote the sample count for the given variant.</p>
-<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">found_in_cosmic</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/VariantAnnotation/man/VCF-class.html">info</a></span><span class="op">(</span><span class="va">cosmic_db</span><span class="op">)</span><span class="op">[</span><span class="fu">subjectHits</span><span class="op">(</span><span class="va">cosmics_hits</span><span class="op">)</span>,<span class="op">]</span>
 <span class="va">found_in_cosmic</span> <span class="op">=</span> <span class="va">found_in_cosmic</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/order.html">order</a></span><span class="op">(</span><span class="op">-</span><span class="va">found_in_cosmic</span><span class="op">$</span><span class="va">CNT</span><span class="op">)</span>,<span class="op">]</span>
 <span class="va">found_in_cosmic</span> <span class="op">=</span> <span class="va">found_in_cosmic</span><span class="op">[</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span><span class="op">(</span><span class="va">found_in_cosmic</span><span class="op">$</span><span class="va">CNT</span><span class="op">)</span>,<span class="op">]</span>
