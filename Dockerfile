@@ -23,6 +23,11 @@ RUN wget http://hgdownload.cse.ucsc.edu/goldenpath/hg19/chromosomes/chr7.fa.gz \
 	&& samtools faidx chr7.fa \
 	&& bwa index chr7.fa
 
+# Get rfPred reference data
+WORKDIR /home/rstudio/rfPred
+RUN wget http://www.sbim.fr/rfPred/all_chr_rfPred.txtz && \
+	wget http://www.sbim.fr/rfPred/all_chr_rfPred.txtz.tbi
+
 WORKDIR /home/rstudio
 
 RUN Rscript -e "options(repos = c(CRAN = 'https://cran.r-project.org')); BiocManager::install(c('TxDb.Hsapiens.UCSC.hg19.knownGene', 'BSgenome.Hsapiens.UCSC.hg19', 'PolyPhen.Hsapiens.dbSNP131', 'VariantAnnotation', 'BioBase', 'tidyverse'), ask=FALSE)"
