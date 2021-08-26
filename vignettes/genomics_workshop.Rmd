@@ -409,6 +409,46 @@ coding$SYMBOL <- biomaRt::select(org.Hs.eg.db, keys=coding$GENEID, columns=c("SY
 coding[3:4]
 ```
 
+We can discard the synonymous mutations, and the rest are potential cancer drivers.
+Then map them back to the VCF data and filter it.
+
+```{r, eval = TRUE}
+potential_drivers = coding[!is.na(coding$CONSEQUENCE) & coding$CONSEQUENCE != "synonymous"]
+potential_drivers = rowRanges(vcf)[overlapsAny(rowRanges(vcf), potential_drivers, ignore.strand=TRUE)]
+```
+
+
+#### *Predict impact*
+
+For the nonsynonymous mutations, we'd like to know how much these impact the protein.
+For this, we will use to pre-calculated scores from the rfPred package.
+To work out how to use the package, we look up the help.
+```{r, eval = FALSE}
+`?rfPred-package`
+```
+
+If you click on the index link, it will show you all functions available in the package.
+Check what the scoring function requires we see the `variant_list` parameter requires a `data.frame` with specific columns.
+We'll need to create that before calling the function.
+
+```{r, eval = FALSE}
+library(rfPred)
+rfpred_gr = potential_drivers
+seqlevelsStyle(rfpred_gr) = "NCBI"
+rfpred_df = data.frame(
+  seqnames=seqnames(rfpred_gr),
+  start=start(rfpred_gr),
+  reference=as.character(rfpred_gr$REF),
+  alteration =as.character(unlist(rfpred_gr$ALT)))
+scores = rfPred::rfPred_scores(
+  variant_list=rfpred_df, 
+  data="/home/rstudio/rfPred/all_chr_rfPred.txtz",
+  index="/home/rstudio/rfPred/all_chr_rfPred.txtz.tbi")
+scores = scores[order(-as.numeric(scores$rfPred_score)),]
+head(scores, 20)
+```
+
+
 #### *Match variants within COSMIC*
 
 To work out which variants are likely driver genes, we can check if they have been seen before in [COSMIC](https://cancer.sanger.ac.uk/cosmic/)
@@ -419,14 +459,6 @@ Read and pre-process COSMIC database.
 cosmic_path <- system.file("vcf", "cosmic_67.vcf.gz", package = "COSMIC.67")
 cosmic_db <- readVcf(cosmic_path, genome = "GRCh37")
 seqlevelsStyle(cosmic_db) <- "UCSC"
-```
-
-We can discard the synonymous mutations, and the rest are potential cancer drivers.
-Then map them back to the VCF data and filter it.
-
-```{r, eval = TRUE}
-potential_drivers = coding[!is.na(coding$CONSEQUENCE) & coding$CONSEQUENCE != "synonymous"]
-potential_drivers = rowRanges(vcf)[overlapsAny(rowRanges(vcf), potential_drivers, ignore.strand=TRUE)]
 ```
 
 The potential driver variants are matched with the COSMIC database.
