@@ -111,7 +111,7 @@ man samtools #q for quitting the man page
 ls | head -3
 ```
 
-4. SNV analysis workflow (**image to be updated**)
+4. SNV analysis workflow
 
 ```{r, echo=FALSE}
 knitr::include_graphics("../inst/extdata/snvWorkflow.png")
