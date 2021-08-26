@@ -30,7 +30,7 @@ RUN wget http://www.sbim.fr/rfPred/all_chr_rfPred.txtz && \
 
 WORKDIR /home/rstudio
 
-RUN Rscript -e "options(repos = c(CRAN = 'https://cran.r-project.org')); BiocManager::install(c('TxDb.Hsapiens.UCSC.hg19.knownGene', 'BSgenome.Hsapiens.UCSC.hg19', 'PolyPhen.Hsapiens.dbSNP131', 'VariantAnnotation', 'BioBase', 'tidyverse'), ask=FALSE)"
+RUN Rscript -e "options(repos = c(CRAN = 'https://cran.r-project.org')); BiocManager::install(c('TxDb.Hsapiens.UCSC.hg19.knownGene', 'BSgenome.Hsapiens.UCSC.hg19', 'PolyPhen.Hsapiens.dbSNP131', 'VariantAnnotation', 'BioBase', 'tidyverse', 'rfPred'), ask=FALSE)"
 
 COPY --chown=rstudio:rstudio . /home/rstudio/
 

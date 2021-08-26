@@ -21,7 +21,8 @@ Depends:
     BSgenome.Hsapiens.UCSC.hg19,
     PolyPhen.Hsapiens.dbSNP131,
     COSMIC.67,
-    org.Hs.eg.db
+    org.Hs.eg.db,
+	rfPred
 Suggests: 
     knitr,
     rmarkdown,
