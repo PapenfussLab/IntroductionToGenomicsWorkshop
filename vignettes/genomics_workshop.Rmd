@@ -66,9 +66,9 @@ For this 120-minute workshop:
 |--------------------------------------------------------|------|
 | Introduction                                           |  5m  |
 | Working Environment: command line and Rstudio          | 15m  |
-| Read Alignment: bwa and samtools                       | 30m  |
-| SNV calling: Strelka2                                  | 40m  |
-| Pathogenicity analysis                                 | 20m  |
+| Read Alignment: bwa and samtools                       | 20m  |
+| SNV calling: Strelka2                                  | 20m  |
+| Pathogenicity analysis                                 | 50m  |
 | Summary                                                | 10m  |
 
 ### Workshop goals and objectives
